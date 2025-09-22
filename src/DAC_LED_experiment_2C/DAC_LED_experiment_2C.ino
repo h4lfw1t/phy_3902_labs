@@ -10,9 +10,14 @@ float const DIODE_RESISTANCE = 0;  // Ohms
 
 Adafruit_MCP4725 dac;
 
-// - Prototypes - 
 template <typename T>
-void printSerialCSV(T value, bool eol = false);
+void printSerialCSV(T value, bool eol = false) {
+  if (eol) {
+    Serial.println(value);
+  } else {
+    Serial.print(String(value) + ",");
+  }
+}
 
 void setup() {
   Serial.begin(9600);
@@ -27,7 +32,7 @@ void setup() {
 void loop() {
   if (not hasRun) {
     Serial.println("Outputting voltage series.");
-    Serial.println("out,A0,A1,A2,A0-A1,A1-A2,current");
+    Serial.println("out,A0,A1,A2,A0-A1,A1-A2,current (mA)");
     for (int i = 0; i < 51; i++) {
       // Ramp voltage from 0V to 5V with a 0.1 step
       int outputSignal = float_map(i, 0, 51, 0, 4095);
@@ -47,7 +52,7 @@ void loop() {
       printSerialCSV(signalA2);
       printSerialCSV(signalA0 - signalA1);
       printSerialCSV(signalA1 - signalA2);
-      printSerialCSV(((signalA0 - signalA1) / RESISTOR), true);
+      printSerialCSV(((signalA0 - signalA1) / RESISTOR * 1000), true);
 
       delay(50);
     }
@@ -80,13 +85,4 @@ float readAnalogToVoltage(unsigned long pin) {
 // Custom map function to work with floats instead of integers
 float float_map(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
   return toLow + ((value - fromLow) * (toHigh - toLow)) / (fromHigh - fromLow);
-}
-
-template <typename T>
-void printSerialCSV(T value, bool eol = false) {
-  if (eol) {
-    Serial.println(value);
-  } else {
-    Serial.print(String(value) + ",");
-  }
 }
