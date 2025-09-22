@@ -25,9 +25,10 @@ Adafruit_MCP4725 dac;
 template <typename T>
 void printSerialCSV(T value, bool eol = false) {
   if (eol) {
-    Serial.println(value);
+    Serial.println(value, 4);
   } else {
-    Serial.print(String(value) + ",");
+    Serial.print(value, 4);
+    Serial.print(",");
   }
 }
 
