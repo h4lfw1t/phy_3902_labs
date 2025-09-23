@@ -252,11 +252,10 @@ void printHeader() {
 void setup() {
     Serial.begin(9600);
     dac.begin(0x62);
-    for (int i = 0; i < 35; i++) {
-        Serial.print("-");
-    }
-    Serial.println();
-    Serial.println("DAC mounted to 0x62");
+    // for (int i = 0; i < 35; i++) {
+    //     Serial.print("-");
+    // }
+    // Serial.println();
 }
 
 // --- Arduino Loop ---
