@@ -6,17 +6,21 @@ import pandas as pd
 from scipy.optimize import curve_fit
 from scipy.constants import k, e
 
-data_dir = "../data"
+data_dir = "../data/2d"
 
 # Define column name remap for more explanatory names
 csv_column_remap = {
     "out": "V_out (V)",
     "A0": "V_a0 (V)",
-    "A1": "V_in - A1 (V)",
-    "A2": "Ground (V)",
+    "dA0": "dV_a0 (V)",
+    "A1": "V_in A1 (V)",
+    "dA1": "dV_in A1 (V)",
     "A0-A1": "Voltage Drop Across R (A0 - A1) (V)",
+    "d(A0-A1)": "d Voltage Drop Across R (A0 - A1) (V)",
     "A1-A2": "Voltage Drop Across LED (A1 - Ground) (V)",
+    "d(A1-A2)": "d Voltage Drop Across LED (A1 - Ground) (V)",
     "current (mA)": "Current Through R and LED (mA)",
+    "d(current (mA))": "d Current Through R and LED (mA)",
 }
 
 # LED I-V Characteristic: I = I_s (exp(V/(nV_T)) - 1)
@@ -50,9 +54,10 @@ def fit_and_plot_led_iv(csv_file):
     # Read and rename columns for clarity
     df = pd.read_csv(csv_file).rename(columns=csv_column_remap)
 
-    # Extract voltage and current data
+    # Extract voltage, current, and current error data
     V = df["Voltage Drop Across LED (A1 - Ground) (V)"]
     I = df["Current Through R and LED (mA)"] * 1e-3  # Convert mA to A
+    dI = df["d Current Through R and LED (mA)"] * 1e-3  # Convert mA to A
 
     try:
         # Fit the curve with bounds to ensure physical parameters
@@ -66,9 +71,13 @@ def fit_and_plot_led_iv(csv_file):
         print(f"  Fitted saturation current I_s: {I_s_fit:.2e} A")
         print(f"  Fitted ideality factor n: {n_fit:.2f}\n")
 
+        # Clean up dI: replace nans or non-positive values with a negligible value
+        dI_clean = np.where((dI > 0) & np.isfinite(dI), dI, 1e-9)
+
         # Plot data and fit
         plt.figure(figsize=(8,5))
-        plt.scatter(V, I*1e3, label="Measured Data", color="blue")
+        # Plot measured data with error bars
+        plt.errorbar(V, I*1e3, yerr=dI_clean*1e3, fmt='o', label="Measured Data", color="blue", capsize=3, markersize=2)
         V_fit = np.linspace(V.min(), V.max(), 200)
         I_fit = led_iv_curve(V_fit, *popt)
         plt.plot(V_fit, I_fit*1e3, label="Fit", color="red")
