@@ -24,6 +24,7 @@ struct DiffStats {
 
 // --- Constants ---
 const float RESISTOR = 218.3; // Ohms
+const float RESISTOR_TOLERANCE = 0.005; // 0.5%
 const float DIODE_RESISTANCE = 0;  // Ohms
 const uint8_t DAC_ADDR = 0x62;
 const int DAC_STEPS = 51;
@@ -216,10 +217,14 @@ void acquireAndPrintData(int step) {
     AnalogStats signalA1 = readA1();
     AnalogStats signalA2 = readA2();
 
+
     DiffStats a0_a1 = calcDiffStats(signalA0, signalA1);
     DiffStats a1_a2 = calcDiffStats(signalA1, signalA2);
     float current = (a0_a1.diff / RESISTOR) * 1000;
-    float currentError = (a0_a1.error / RESISTOR) * 1000;
+    // Error propagation for I = V/R: dI = I * sqrt( (dV/V)^2 + (dR/R)^2 )
+    float dV = a0_a1.error;
+    float dR = RESISTOR * RESISTOR_TOLERANCE;
+    float currentError = current * sqrt( pow(dV / a0_a1.diff, 2 ) + pow(dR / RESISTOR, 2 ) );
 
     printDataCSVRow(outputVoltage, signalA0, signalA1, signalA2, a0_a1, a1_a2, current, currentError);
 
