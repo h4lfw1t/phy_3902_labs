@@ -8,6 +8,7 @@ from typing import Tuple, List, Dict
 
 # --- Configuration ---
 DATA_DIR = '../data/2d'
+OUT_DIR = '../out'
 LED_WAVELENGTHS_NM = {
     'blue': 470,
     'green': 525,
@@ -27,6 +28,7 @@ LED_COLOR_MAP = {
     '2d_yellow_led.csv': 'yellow',
     '2d_red_led.csv': 'red'
 }
+os.makedirs(OUT_DIR, exist_ok=True)
 
 # --- Data Extraction Functions ---
 def get_threshold_voltage(csv_path: str) -> Tuple[float, float]:
@@ -84,9 +86,9 @@ def calculate_plancks_constant(slope: float) -> float:
     """
     Calculate Planck's constant from the slope of the fit.
     Args:
-        slope: Slope from linear fit (V·m).
+        slope: Slope from linear fit (V*m).
     Returns:
-        Experimental Planck's constant (J·s).
+        Experimental Planck's constant (J*s).
     """
     return slope * e / c
 
@@ -114,7 +116,9 @@ def plot_led_data(inv_wavelengths: np.ndarray, inv_wavelengths_err: np.ndarray, 
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    out_path = os.path.join(OUT_DIR, 'led_threshold_vs_inv_wavelength.png')
+    plt.savefig(out_path)
+    plt.close()
 
 # --- Main Execution ---
 def main():
@@ -130,9 +134,9 @@ def main():
     slope, intercept, r_value, p_value, std_err = linregress(inv_wavelengths, vths)
     h_exp = calculate_plancks_constant(slope)
     plot_led_data(inv_wavelengths, inv_wavelengths_err, vths, vth_errs, slope, intercept, colors)
-    print(f"Experimental Planck's constant: h = {h_exp:.3e} J·s")
-    print(f"Literature value: h = 6.626e-34 J·s")
-    print(f"Slope (hc/e): {slope:.3e} V·m ± {std_err:.2e}")
+    print(f"Experimental Planck's constant: h = {h_exp:.3e} J*s")
+    print(f"Literature value: h = 6.626e-34 J*s")
+    print(f"Slope (hc/e): {slope:.3e} V*m +/- {std_err:.2e}")
     print(f"R^2 of fit: {r_value**2:.3f}")
     print(f"Percent error in h: {abs((h_exp - 6.626e-34) / 6.626e-34) * 100:.2f}%")
 
