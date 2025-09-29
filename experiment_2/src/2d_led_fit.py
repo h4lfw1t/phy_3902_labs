@@ -6,6 +6,9 @@ from scipy.optimize import curve_fit
 from scipy.constants import k, e
 from typing import Dict, Any, List, Tuple
 
+OUT_DIR = '../out'
+os.makedirs(OUT_DIR, exist_ok=True)
+
 def led_iv_curve(V: np.ndarray, I_s: float, n: float) -> np.ndarray:
     """
     LED I-V characteristic equation.
@@ -116,7 +119,9 @@ def plot_led_results(led_results: List[Dict[str, Any]], title: str = "LED I-V Ch
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    out_path = os.path.join(OUT_DIR, '2d_led_fit_plot.png')
+    plt.savefig(out_path)
+    plt.close()
 
 def main(data_dir: str = "../data/2d") -> None:
     """
