@@ -9,6 +9,8 @@ This folder contains code, data, and documentation for laboratory experiments in
   - **2d/**: I-V data for blue, green, yellow, and red LEDs (CSV).
 - **docs/**
   - `PHY 3902_LED_E_2023.pdf`: Lab manual and experiment description.
+  - Final report files: Add your completed LaTeX source and compiled PDF here (e.g., `LED_IV_Planck_Report_v1.tex`, `LED_IV_Planck_Report_v1.pdf`).
+  - Figures and supplementary documentation.
 - **src/**
   - `2d_led_fit.py`: Python script to fit LED I-V curves and extract parameters from CSV data.
   - `planck_led_graph.py`: Python script to analyze threshold voltages and plot voltage vs. wavelength for LEDs.
@@ -46,7 +48,12 @@ This folder contains code, data, and documentation for laboratory experiments in
 
 ## Documentation
 See `docs/PHY 3902_LED_E_2023.pdf` for experiment details, procedures, and background theory.
+Add your final report and LaTeX source to the `docs/` folder using a descriptive filename (e.g., `LED_IV_Planck_Report_v1.tex`, `LED_IV_Planck_Report_v1.pdf`).
+
+## Version Control Best Practices
+- Track source files (code, LaTeX, CSV data) in git.
+- Add generated or intermediate files (e.g., out/, *.aux, *.log) to `.gitignore`.
+- Only include final publishable outputs (e.g., PDF report) in version control if needed.
 
 ## Contact
 For questions, contact the course instructor or lab TA.
-
