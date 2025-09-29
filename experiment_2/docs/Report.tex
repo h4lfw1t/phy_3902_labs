@@ -1,0 +1,169 @@
+% PHY 3902 Experiment 2 Lab Report
+% Author: Patrick Geraghty
+% Affiliation: University of Ottawa
+% Date: September 28, 2025
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf,it]{caption}
+
+% Python and Arduino code formatting
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b,
+  inputencoding=utf8
+}
+
+\begin{document}
+
+% Title
+\begin{center}
+    {\LARGE\bfseries PHY 3902 Experiment 2 Lab Report}\\[1.5em]
+    {\large Author: Patrick Geraghty}\\
+    {\large Affiliation: University of Ottawa}\\
+    {\large Date: September 28, 2025}
+\end{center}
+
+% Abstract
+\section*{Abstract}
+This experiment investigates the properties of light-emitting diodes (LEDs) by analyzing their current-voltage (I-V) characteristics. The saturation current and ideality factor for each diode are determined from their I-V curves. Threshold voltages are measured and correlated with the emission wavelengths of the LEDs. By plotting threshold voltage against inverse wavelength and performing linear regression, an experimental value for Planck's constant is obtained. The results demonstrate the relationship between electrical energy and light emission, and provide a hands-on determination of a fundamental physical constant.
+
+% Introduction
+\section{Introduction}
+The behavior of light-emitting diodes (LEDs) provides a practical means to explore the relationship between electrical energy and light emission. LEDs emit light at specific wavelengths, which are related to the energy required to activate the diode. In this experiment, the I-V characteristics of four different LEDs are measured and analyzed to extract their saturation currents and ideality factors, providing insight into basic diode behavior. The threshold voltage required to activate each LED is also determined. By plotting the threshold voltage against the inverse wavelength of the LEDs and performing a linear fit, an experimental value for Planck's constant is extracted. This approach provides experience with data analysis, uncertainty, and the determination of physical constants.
+
+% Methods
+\section{Methods}
+The experiment consisted of two main parts: characterization of LED I-V curves and determination of Planck’s constant using threshold voltages.
+
+\subsection{Apparatus and Data Collection}
+A custom voltage divider circuit was built to measure the current-voltage (I-V) characteristics of four LEDs (blue, green, yellow, and red). Data acquisition was automated using an Arduino microcontroller and a digital-to-analog converter (DAC), with custom Arduino sketches (see Supplementary Code) controlling voltage sweeps and recording current measurements.
+
+\subsection{I-V Curve Analysis}
+The I-V data for each LED was analyzed using the Python script \texttt{2d\_led\_fit.py}. The LED current as a function of voltage was modeled by the diode equation:
+\begin{equation}
+I(V) = I_s \left( e^{V/(n V_T)} - 1 \right)
+\end{equation}
+where $I_s$ is the saturation current, $n$ is the ideality factor, and $V_T$ is the thermal voltage at room temperature. The thermal voltage is defined as $V_T = \frac{kT}{q}$, where $k$ is Boltzmann's constant, $T$ is the absolute temperature, and $q$ is the elementary charge. Nonlinear curve fitting (using SciPy’s \texttt{curve\_fit}) was performed to extract $I_s$ and $n$ for each LED. Measurement uncertainties were propagated and cleaned to ensure robust fits.
+
+\subsection{Threshold Voltage and Planck’s Constant}
+Threshold voltages were determined for each LED by identifying the voltage at which the current exceeded 0.01 mA and remained above this value. The Python script \texttt{planck\_led\_graph.py} automated this process and correlated threshold voltages with the emission wavelengths of the LEDs (as specified by in-lab equipment). The inverse wavelength ($1/\lambda$) was plotted against threshold voltage, and linear regression was performed. The slope of the fit was used to estimate Planck’s constant via the relation:
+\begin{equation}
+h = \text{slope} \cdot e / c
+\end{equation}
+where $e$ is the elementary charge and $c$ is the speed of light.
+
+\subsection{Software and Analysis}
+All data analysis was performed in Python 3 using custom scripts adapted from provided reference scripts and literature. Figures and tables were generated using Matplotlib. Relevant code is included in the supplementary section at the end of this report.
+
+% Results and Discussion
+\section{Results and Discussion}
+
+\subsection{I-V Curve Analysis}
+
+The current-voltage (I-V) characteristics of four LEDs (blue, green, yellow, and red) was measured and analyzed. The experimental data was fitted to the diode equation (1) to extract the saturation current ($I_s$) and ideality factor ($n$) for each LED. The results are summarized in Table~\ref{tab:ivparams}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+LED Color & Saturation Current $I_s$ (A) & Ideality Factor $n$ \\
+\hline
+Blue    & $9.37 \times 10^{-10}$ & 7.10 \\
+Green   & $5.86 \times 10^{-9}$  & 7.17 \\
+Red     & $1.98 \times 10^{-8}$  & 5.56 \\
+Yellow  & $6.50 \times 10^{-11}$ & 3.93 \\
+\hline
+\end{tabular}
+\caption{Fitted saturation current and ideality factor for each LED.}
+\label{tab:ivparams}
+\end{table}
+
+Figure~\ref{fig:ivfit} shows the measured I-V curves and the fitted diode model for all LEDs. The fits are generally good, though the ideality factors are higher than typical values for silicon diodes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/2d_led_fit_plot.png}
+    \caption{Measured I-V curves and fitted diode model for blue, green, yellow, and red LEDs. Each set of points represents experimental data for a specific LED, with error bars indicating measurement uncertainty in current. The dashed lines show the best-fit diode equation for each LED, from which the saturation current and ideality factor were extracted. The plot highlights the exponential increase in current with voltage and the differences in turn-on behavior between LED colors. The quality of fit and the spread of data points illustrate both the strengths and limitations of the diode model for real LEDs.}
+    \label{fig:ivfit}
+\end{figure}
+
+The I-V curve analysis provides insight into the electrical behavior of the LEDs, but several limitations and sources of error should be considered. The fitted ideality factors (ranging from 3.93 to 7.17) are significantly higher than typical values for standard diodes (usually 1–2), indicating non-ideal behavior. This may arise from measurement errors, contact resistance, or deviations from the ideal diode model in real LEDs. The cleaning of current error values by replacing non-positive or NaN entries with a small constant (1e-9 A) may not accurately reflect the true measurement uncertainty, potentially biasing the analysis.
+
+Other sources of error include temperature variations during data acquisition, and noise in the current measurements. The arbitrary choice of a current cutoff (0.01 mA) for determining threshold voltage may also introduce systematic bias. To improve the reliability of the I-V analysis, future work should consider more robust error estimation, and careful control of experimental conditions. Overall, while the I-V analysis yields reasonable fits and trends, the extracted parameters and their uncertainties should be interpreted with caution due to these limitations.
+
+A paper by Guo Wei-Ling, et al. on the electrical characteristics of high-voltage LEDs ~\cite{ref1}, provided valuable insight into the electrical characteristics of LEDs, particularly regarding the ideality factor. Although the paper focuses on high-voltage GaN-based LEDs, which differ from the standard LEDs used in our experiment, it discusses similar observations of high ideality factors and possible contributing factors. While not all findings are directly applicable to our setup, it helped inform our understanding of non-ideal diode behavior and the challenges in interpreting experimental results.
+
+\subsection{Threshold Voltage and Planck's Constant}
+
+Threshold voltages for each LED were determined and plotted against the inverse of their emission wavelength. Figure~\ref{fig:planck} shows the resulting graph and linear fit. The slope of the fit was used to estimate Planck's constant.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/led_threshold_vs_inv_wavelength.png}
+    \caption{Threshold voltage versus inverse wavelength for the four LEDs. Each data point corresponds to a different LED, with horizontal error bars representing uncertainty in the inverse wavelength (based on manufacturer specifications) and vertical error bars for threshold voltage (based on measurement repeatability). The solid line shows the linear regression fit, whose slope is used to estimate Planck's constant. The plot demonstrates the expected linear relationship, but also reveals the impact of measurement and systematic uncertainties, as seen in the spread and size of the error bars.}
+    \label{fig:planck}
+\end{figure}
+
+The experimentally determined value of Planck's constant was $h = 8.742 \times 10^{-34}$~J\,s, compared to the accepted literature value of $h = 6.626 \times 10^{-34}$~J\,s. The percent error was 31.94\%. The $R^2$ value of the fit was 0.965, indicating a strong linear relationship between threshold voltage and inverse wavelength. The uncertainty in the slope was $\pm 2.22 \times 10^{-7}$~V\,m.
+
+The threshold voltage analysis and subsequent determination of Planck's constant demonstrate the relationship between LED threshold voltage and emission wavelength. However, a closer inspection of the plot in Figure~\ref{fig:planck} reveals a notable issue: the vertical error bars (uncertainty in threshold voltage) are nearly invisible, while the horizontal error bars (uncertainty in inverse wavelength) are relatively large. Despite the small vertical uncertainties, the experimentally determined value of Planck's constant deviates by 31\% from the accepted value. This discrepancy is not reflected by the error bars, indicating that the uncertainties in threshold voltage are likely underestimated or that significant systematic errors are present.
+
+Possible sources of error include:
+\begin{itemize}
+    \item Underestimation of threshold voltage uncertainty due to limitations in the measurement method or data analysis (e.g., the current cutoff criterion).
+    \item Systematic errors in the determination of threshold voltage, such as contact resistance, temperature effects, or non-ideal diode behavior.
+    \item Inaccuracies in the specified LED wavelengths, which contribute to the large horizontal error bars but do not fully explain the deviation in Planck's constant.
+    \item The assumption that the threshold voltage directly corresponds to photon energy may neglect other physical effects in the LED junction.
+\end{itemize}
+
+The strong linear correlation ($R^2 = 0.965$) suggests the method is valid in principle, but the error analysis does not realistically capture the true uncertainty in the experimental value of $h$. To improve reliability, future work should focus on more robust estimation of threshold voltage uncertainty, careful consideration of systematic effects, and possibly alternative methods for threshold determination. Overall, while the experiment successfully demonstrates the relationship between LED threshold voltage and emission wavelength, the reported uncertainty does not account for the observed deviation, and the result should be interpreted with caution.
+
+In comparison to previous work, such as the experiment described by Calvo-Mola et al.~\cite{ref2}, our goal was to demonstrate the same fundamental concepts using a similar approach and comparable equipment. However, despite these similarities, our results were less accurate and had larger uncertainties. Their report details a more careful measurement process, including precise calibration, accurate determination of LED wavelengths, and refined methods for extracting threshold voltages. As a result, their experimental value for Planck's constant was much closer to the accepted value. In our experiment, factors such as measurement noise, less rigorous calibration, and a simpler approach to threshold voltage determination contributed to the larger deviation and underestimated uncertainties. This experiment was used as a guide for methodology and analysis, and our results highlight the importance of attention to detail and thorough error analysis for achieving high accuracy in physical constant determination.
+
+% Conclusion
+\section{Conclusion}
+
+This experiment provided a comprehensive investigation into the electrical properties of LEDs. By analyzing the I-V characteristics, we extracted saturation currents and ideality factors, revealing significant non-ideal behavior and highlighting the importance of careful error analysis and experimental design. The determination of Planck's constant from threshold voltage and wavelength data demonstrated the relationship between LED threshold voltage and emission wavelength, but also exposed limitations in uncertainty estimation and the impact of systematic errors. While the strong linear correlation supports the underlying physical relationship, the large deviation from the accepted value of Planck's constant and the underestimated uncertainties indicate that further refinement of methods is needed. Future work should focus on improving measurement accuracy, error propagation, and accounting for systematic effects. Overall, the experiment successfully illustrated basic concepts in diode behavior and the challenges of precise experimental determination of fundamental constants.
+
+% References
+\begin{thebibliography}{9}
+\bibitem{ref1} Guo W-L, Yan W-W, Zhu Y-X, et al; “Analysis on electrical characteristics of high-voltage gan-based light-emitting diodes”; Chinese Physics B 21:127201; doi: 10.1088/1674-1056/21/12/127201 (2012)
+\bibitem{ref2} C. Calvo-Mola, S. López-Pérez, E. Garcıa-Alfonso, J. Cerutti-Torres; “Determination Of The Planck Constant Through The Use Of LEDS” (2019)
+% Add more as needed
+\end{thebibliography}
+
+% Supplementary: Code Listings
+\appendix
+\section{Supplementary: Code}
+
+\subsection{Python Code}
+
+\lstinputlisting[language=Python,caption={LED I-V Curve Fitting and Parameter Extraction}]{../src/2d_led_fit.py}
+
+\lstinputlisting[language=Python,caption={LED Threshold Analysis and Planck’s Constant Estimation}]{../src/planck_led_graph.py}
+
+\subsection{Arduino Code}
+
+
+\lstinputlisting[language=C++,caption={DAC LED Analyzer 2C}]{../src/DAC_LED_experiment_2C/DAC_LED_experiment_2C.ino}
+
+\lstinputlisting[language=C++,caption={DAC setup experiment 2B}]{../src/DAC_test_experiment_2B/DAC_test_experiment_2B.ino}
+
+\end{document}
