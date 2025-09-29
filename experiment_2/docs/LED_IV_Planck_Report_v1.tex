@@ -55,17 +55,31 @@ The experiment consisted of two main parts: characterization of LED I-V curves a
 \subsection{Apparatus and Data Collection}
 A custom voltage divider circuit was built to measure the current-voltage (I-V) characteristics of four LEDs (blue, green, yellow, and red). Data acquisition was automated using an Arduino microcontroller and a digital-to-analog converter (DAC), with custom Arduino sketches (see Supplementary Code) controlling voltage sweeps and recording current measurements.
 
+\subsubsection*{LED Wavelengths}
+The nominal emission wavelengths and their uncertainties for the LEDs used in this experiment were:
+
+\begin{itemize}
+    \item \textbf{Blue}: 470~nm\ (range: 460--475~nm)
+    \item \textbf{Green}: 520--525~nm
+    \item \textbf{Red}: 623~nm\ (range: 620--630~nm)
+    \item \textbf{Yellow}: 589~nm\ (range: 585--595~nm)
+\end{itemize}
+
+These wavelength ranges were used to estimate uncertainties in the inverse wavelength for the analysis of threshold voltage and Planck's constant.
+
 \subsection{I-V Curve Analysis}
-The I-V data for each LED was analyzed using the Python script \texttt{2d\_led\_fit.py}. The LED current as a function of voltage was modeled by the diode equation:
+The I-V data for each LED was analyzed using the code listing \textit{LED I-V Curve Fitting and Parameter Extraction} (Listing~\ref{lst:iv_fit}) in section~\ref{sec:supplementary_code}. The LED current as a function of voltage was modeled by the diode equation:
 \begin{equation}
 I(V) = I_s \left( e^{V/(n V_T)} - 1 \right)
+\label{eq:diode}
 \end{equation}
 where $I_s$ is the saturation current, $n$ is the ideality factor, and $V_T$ is the thermal voltage at room temperature. The thermal voltage is defined as $V_T = \frac{kT}{q}$, where $k$ is Boltzmann's constant, $T$ is the absolute temperature, and $q$ is the elementary charge. Nonlinear curve fitting (using SciPy’s \texttt{curve\_fit}) was performed to extract $I_s$ and $n$ for each LED. Measurement uncertainties were propagated and cleaned to ensure robust fits.
 
 \subsection{Threshold Voltage and Planck’s Constant}
-Threshold voltages were determined for each LED by identifying the voltage at which the current exceeded 0.01 mA and remained above this value. The Python script \texttt{planck\_led\_graph.py} automated this process and correlated threshold voltages with the emission wavelengths of the LEDs (as specified by in-lab equipment). The inverse wavelength ($1/\lambda$) was plotted against threshold voltage, and linear regression was performed. The slope of the fit was used to estimate Planck’s constant via the relation:
+Threshold voltages were determined for each LED by identifying the voltage at which the current exceeded 0.01 mA and remained above this value. The code listing \textit{LED Threshold Analysis and Planck’s Constant Estimation} (Listing~\ref{lst:planck_analysis}) in section~\ref{sec:supplementary_code} automated this process and correlated threshold voltages with the emission wavelengths of the LEDs (as specified by in-lab equipment). The inverse wavelength ($1/\lambda$) was plotted against threshold voltage, and linear regression was performed. The slope of the fit was used to estimate Planck’s constant via the relation:
 \begin{equation}
 h = \text{slope} \cdot e / c
+\label{eq:planck}
 \end{equation}
 where $e$ is the elementary charge and $c$ is the speed of light.
 
@@ -77,7 +91,7 @@ All data analysis was performed in Python 3 using custom scripts adapted from pr
 
 \subsection{I-V Curve Analysis}
 
-The current-voltage (I-V) characteristics of four LEDs (blue, green, yellow, and red) was measured and analyzed. The experimental data was fitted to the diode equation (1) to extract the saturation current ($I_s$) and ideality factor ($n$) for each LED. The results are summarized in Table~\ref{tab:ivparams}.
+The current-voltage (I-V) characteristics of four LEDs (blue, green, yellow, and red) was measured and analyzed. The experimental data was fitted to the diode equation \eqref{eq:diode} to extract the saturation current ($I_s$) and ideality factor ($n$) for each LED. The results are summarized in Table~\ref{tab:ivparams}.
 
 \begin{table}[h]
 \centering
@@ -97,11 +111,20 @@ Yellow  & $6.50 \times 10^{-11}$ & 3.93 \\
 
 Figure~\ref{fig:ivfit} shows the measured I-V curves and the fitted diode model for all LEDs. The fits are generally good, though the ideality factors are higher than typical values for silicon diodes.
 
+A closer inspection of the individual and group I-V plots (see Figures~\ref{fig:ivfit} and~\ref{fig:yellowiv}) reveals a key source of error in the curve fitting process. While the fitted diode equation tracks the experimental data well at both low and high voltages, it diverges noticeably in the "elbow" region, where the current begins to increase rapidly. In this region, the actual LED data exhibits a much sharper transition than the fitted curve, which rises more gradually. This difference means the real LED behaves more like an ideal diode, with a sudden turn-on, whereas the model underestimates the rate of change. As a result, the extracted ideality factor is systematically higher than expected. The ideality factor is highly sensitive to the steepness of the curve at the elbow, so any inability of the model to capture this sharpness leads to significant error. This limitation is inherent to the diode equation fit and is not simply a result of measurement uncertainty or data cleaning. Addressing this modeling mismatch would require either a more sophisticated physical model or a targeted fitting approach that better accounts for the rapid turn-on behavior of real LEDs.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/2d_led_fit_plot.png}
     \caption{Measured I-V curves and fitted diode model for blue, green, yellow, and red LEDs. Each set of points represents experimental data for a specific LED, with error bars indicating measurement uncertainty in current. The dashed lines show the best-fit diode equation for each LED, from which the saturation current and ideality factor were extracted. The plot highlights the exponential increase in current with voltage and the differences in turn-on behavior between LED colors. The quality of fit and the spread of data points illustrate both the strengths and limitations of the diode model for real LEDs.}
     \label{fig:ivfit}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../out/yellow_led_fit.png}
+    \caption{Measured I-V curve and fitted diode model for the yellow LED. This plot shows the experimental data points with error bars and the best-fit diode equation for the yellow LED only, illustrating its individual turn-on behavior and fit quality.}
+    \label{fig:yellowiv}
 \end{figure}
 
 The I-V curve analysis provides insight into the electrical behavior of the LEDs, but several limitations and sources of error should be considered. The fitted ideality factors (ranging from 3.93 to 7.17) are significantly higher than typical values for standard diodes (usually 1–2), indicating non-ideal behavior. This may arise from measurement errors, contact resistance, or deviations from the ideal diode model in real LEDs. The cleaning of current error values by replacing non-positive or NaN entries with a small constant (1e-9 A) may not accurately reflect the true measurement uncertainty, potentially biasing the analysis.
@@ -112,7 +135,7 @@ A paper by Guo Wei-Ling, et al. on the electrical characteristics of high-voltag
 
 \subsection{Threshold Voltage and Planck's Constant}
 
-Threshold voltages for each LED were determined and plotted against the inverse of their emission wavelength. Figure~\ref{fig:planck} shows the resulting graph and linear fit. The slope of the fit was used to estimate Planck's constant.
+Threshold voltages for each LED were determined and plotted against the inverse of their emission wavelength. Figure~\ref{fig:planck} shows the resulting graph and linear fit. The slope of the fit was used to estimate Planck's constant using equation~\eqref{eq:planck}.
 
 \begin{figure}[H]
     \centering
@@ -152,12 +175,13 @@ This experiment provided a comprehensive investigation into the electrical prope
 % Supplementary: Code Listings
 \appendix
 \section{Supplementary: Code}
+\label{sec:supplementary_code}
 
 \subsection{Python Code}
 
-\lstinputlisting[language=Python,caption={LED I-V Curve Fitting and Parameter Extraction}]{../src/2d_led_fit.py}
+\lstinputlisting[language=Python,caption={LED I-V Curve Fitting and Parameter Extraction},label={lst:iv_fit}]{../src/2d_led_fit.py}
 
-\lstinputlisting[language=Python,caption={LED Threshold Analysis and Planck’s Constant Estimation}]{../src/planck_led_graph.py}
+\lstinputlisting[language=Python,caption={LED Threshold Analysis and Planck’s Constant Estimation},label={lst:planck_analysis}]{../src/planck_led_graph.py}
 
 \subsection{Arduino Code}
 
