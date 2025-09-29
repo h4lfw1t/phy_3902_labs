@@ -123,6 +123,31 @@ def plot_led_results(led_results: List[Dict[str, Any]], title: str = "LED I-V Ch
     plt.savefig(out_path)
     plt.close()
 
+def plot_single_led_result(result: Dict[str, Any], out_dir: str = OUT_DIR) -> None:
+    """
+    Plot measured and fitted I-V data for a single LED and save to a file.
+
+    Args:
+        result (Dict[str, Any]): LED result dict.
+        out_dir (str): Output directory for plots.
+    """
+    plt.figure(figsize=(7, 5))
+    label = result["name"].replace(".csv", "").replace("2d_", "")
+    plt.errorbar(result["V"], result["I"] * 1e3, yerr=result["dI"] * 1e3, fmt='o', label=f"{label} Data", capsize=3, markersize=3)
+    if result["fit_success"]:
+        V_fit = np.linspace(result["V"].min(), result["V"].max(), 200)
+        I_fit = led_iv_curve(V_fit, result["I_s_fit"], result["n_fit"])
+        plt.plot(V_fit, I_fit * 1e3, label=f"{label} Fit", linestyle='--')
+    plt.xlabel("Voltage Across LED (V)")
+    plt.ylabel("Current Through LED (mA)")
+    plt.title(f"LED I-V Characteristic and Fit: {label}")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    out_path = os.path.join(out_dir, f"{label}_fit.png")
+    plt.savefig(out_path)
+    plt.close()
+
 def main(data_dir: str = "../data/2d") -> None:
     """
     Main execution function: processes all LED CSV files and plots results.
@@ -142,6 +167,7 @@ def main(data_dir: str = "../data/2d") -> None:
             print(f"  Fitted ideality factor n: {result['n_fit']:.2f}\n")
         else:
             print(f"{result['name']}: Fit failed\n")
+        plot_single_led_result(result, OUT_DIR)  # Save individual plot for each LED
     plot_led_results(led_results)
 
 if __name__ == "__main__":
