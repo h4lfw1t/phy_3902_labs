@@ -15,7 +15,7 @@ float averageReadLDR(int pin, int numSamples) {
 void setup() {
     pinMode(LASER_PIN, OUTPUT);
     pinMode(LDR_FEED_PIN, INPUT);
-    Serial.begin(115200);
+    Serial.begin(9600);
 }
 
 void loop() {
