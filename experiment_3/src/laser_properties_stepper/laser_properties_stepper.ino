@@ -15,7 +15,7 @@
 // Define Variables 
 int laserPin = 3;     // We will use an output pin to power the laser. 
 const int ldrPin = A0; // LDR analog input pin
-const int increment = 8; // Number of steps per increment (smaller for more data points)
+const int increment = 1; // Number of steps per increment (smaller for more data points)
 const int numSamples = 100; // Number of LDR samples to average per position
 
 // Stepper Motor constants 
