@@ -60,7 +60,7 @@ def plot_brewster_angle(data_file):
     
     # Plot 3: Light intensity
     plt.subplot(2, 2, 3)
-    plt.plot(angles, intensities, marker='o', linestyle='-', color='red')
+    plt.scatter(angles, intensities, marker='o', linestyle='-', color='red')
     plt.title('Light Intensity vs Angle (Brewster Angle Measurement)')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Relative Light Intensity')
@@ -72,7 +72,7 @@ def plot_brewster_angle(data_file):
     
     # Plot 4: Normalized intensity
     plt.subplot(2, 2, 4)
-    plt.plot(angles, normalized_intensities, marker='o', linestyle='-', color='purple')
+    plt.scatter(angles, normalized_intensities, marker='o', color='purple')
     plt.title('Normalized Light Intensity vs Angle')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Normalized Intensity (0-1)')
