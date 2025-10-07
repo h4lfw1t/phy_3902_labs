@@ -111,7 +111,7 @@ void loop() {
       stepperMotor.step(increment); // Move stepper
       LDRStats stats = averageReadLDR(ldrPin, numSamples); // Average LDR
       printDataCSVRow(step, stats.mean, stats.stddev); // Print CSV row
-      delay(50); // Stability delay
+      delay(20); // Stability delay
     }
     digitalWrite(laserPin, LOW); // Laser OFF
     done = true;
