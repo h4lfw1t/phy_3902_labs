@@ -50,7 +50,7 @@ void setup() {
     myServo.attach(SERVO_PIN);
     pinMode(LASER_PIN, OUTPUT);
     digitalWrite(LASER_PIN, HIGH); // Turn on laser
-    myServo.write(90); // Initialize servo position
+    myServo.write(0); // Initialize servo position
     delay(1000); // Wait for servo to reach position
 
     // Print CSV header
@@ -61,7 +61,7 @@ void loop() {
     if (hasRun) {
         return; // Only run once
     }
-    for (pos = 45; pos >= 0; pos -= 1) {
+    for (pos = 0; pos <= 45; pos += 1) {
         myServo.write(pos);
         delay(500); // Wait for servo to reach position
 
@@ -73,7 +73,7 @@ void loop() {
 
         // Print CSV row
         // Reverse position to go from 0 to 45
-        CSVPrinter::printRow(45 - pos, ldrValue, ldrStdDev);
+        CSVPrinter::printRow(pos, ldrValue, ldrStdDev);
 
         delay(100);
     }
