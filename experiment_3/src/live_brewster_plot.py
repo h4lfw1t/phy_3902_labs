@@ -34,7 +34,7 @@ class LiveBrewsterPlotter:
         
         # Circuit parameters
         self.V_supply = 5.0
-        self.R_fixed = 8930  # Adjust based on your circuit
+        self.R_fixed = 9955  # Adjust based on your circuit
         
         # Initialize serial connection
         self.ser = None
