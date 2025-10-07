@@ -19,7 +19,7 @@ def plot_brewster_angle(data_file):
     # Method 1: Simple voltage-based intensity (if using voltage divider)
     # Assuming your LDR is in a voltage divider circuit with a fixed resistor
     V_supply = 5.0  # Supply voltage
-    R_fixed = 8930  # Fixed resistor value in ohms (adjust based on your circuit)
+    R_fixed = 9955  # Fixed resistor value in ohms (adjust based on your circuit)
     
     # Calculate LDR resistance from voltage divider
     # V_ldr = V_supply * R_fixed / (R_ldr + R_fixed)
@@ -40,7 +40,7 @@ def plot_brewster_angle(data_file):
     
     # Plot 1: Raw voltage
     plt.subplot(2, 2, 1)
-    plt.plot(angles, ldr_voltage_feedback, marker='o', linestyle='-', color='blue')
+    plt.scatter(angles, ldr_voltage_feedback, marker='o', s=3, color='blue')
     plt.title('LDR Voltage vs Angle')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Voltage (V)')
@@ -50,7 +50,7 @@ def plot_brewster_angle(data_file):
     
     # Plot 2: Calculated resistance
     plt.subplot(2, 2, 2)
-    plt.plot(angles, ldr_resistance, marker='o', linestyle='-', color='green')
+    plt.scatter(angles, ldr_resistance, marker='o', s=3, color='green')
     plt.title('LDR Resistance vs Angle')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Resistance (Ω)')
@@ -60,7 +60,7 @@ def plot_brewster_angle(data_file):
     
     # Plot 3: Light intensity
     plt.subplot(2, 2, 3)
-    plt.scatter(angles, intensities, marker='o', linestyle='-', color='red')
+    plt.scatter(angles, intensities, marker='o', s=3, color='red')
     plt.title('Light Intensity vs Angle (Brewster Angle Measurement)')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Relative Light Intensity')
@@ -72,7 +72,7 @@ def plot_brewster_angle(data_file):
     
     # Plot 4: Normalized intensity
     plt.subplot(2, 2, 4)
-    plt.scatter(angles, normalized_intensities, marker='o', color='purple')
+    plt.scatter(angles, normalized_intensities, marker='o', s=3, color='purple')
     plt.title('Normalized Light Intensity vs Angle')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('Normalized Intensity (0-1)')
