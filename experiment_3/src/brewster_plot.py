@@ -329,16 +329,18 @@ def highlight_brewster_angles(ax, brewster_angles: List[Tuple], angle_offset: fl
 
             # Calculate text position - alternate between top and bottom for visibility
             if i % 2 == 0:
-                y_pos = ax.get_ylim()[1] * 0.85  # Position at 85% of the y-axis height
+                y_frac = 0.85  # 85% up the axis
                 va = 'top'
             else:
-                y_pos = ax.get_ylim()[1] * 0.15  # Position at 15% of the y-axis height
+                y_frac = 0.65  # 65% up the axis
                 va = 'bottom'
 
-            # Add text label at the appropriate position
-            ax.text(angle, y_pos, label,
+            # Add text label at the appropriate position using axis transform
+            ax.text(angle, y_frac, label,
                     color=color, fontweight='bold', ha='center', va=va,
-                    bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', pad=2))
+                    bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', pad=2),
+                    transform=ax.get_xaxis_transform(),
+                    )
 
     # Update legend with Brewster angle entries
     handles, labels = ax.get_legend_handles_labels()
@@ -418,12 +420,6 @@ def create_brewster_plots(
                               'Relative Light Intensity', 'red')
     relabel_x_axis(intensity_ax, angle_offset)
 
-    # Apply highlighting to intensity plot
-    highlight_regions(intensity_ax, perpendicular_regions, offset=angle_offset)
-
-    # Apply Brewster angle highlighting to intensity plot
-    highlight_brewster_angles(intensity_ax, brewster_angles, angle_offset)
-
     # Plot 4: Gradient visualization
     gradient_ax = plt.subplot(2, 2, 4)
     gradient_ax.plot(angles, smoothed_gradient, color='blue', linewidth=1)
@@ -434,11 +430,11 @@ def create_brewster_plots(
     gradient_ax.grid(True)
     gradient_ax.axhline(y=0, color='gray', linestyle='--')
     relabel_x_axis(gradient_ax, angle_offset)
-    
-    # Highlight the same regions on the gradient plot
-    highlight_regions(gradient_ax, perpendicular_regions, offset=angle_offset)
 
-    # Also highlight Brewster angles on the gradient plot
+    # Highlight regions and Brewster angles on intensity and gradient plots
+    highlight_regions(intensity_ax, perpendicular_regions, offset=angle_offset)
+    highlight_brewster_angles(intensity_ax, brewster_angles, angle_offset)
+    highlight_regions(gradient_ax, perpendicular_regions, offset=angle_offset)
     highlight_brewster_angles(gradient_ax, brewster_angles, angle_offset)
 
     plt.tight_layout()
