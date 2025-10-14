@@ -1,8 +1,10 @@
 import os
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional, Dict, Any
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sp
+from error_propagation import propagate_error
 
 # Experimental constants
 CONSTANTS = {
@@ -181,10 +183,15 @@ def identify_brewster_angles(
 
     return brewster_angles
 
-def setup_subplot(pos: int, x_data: pd.Series, y_data: pd.Series, title: str, ylabel: str, color: str = 'blue'):
+def setup_subplot(pos: int, x_data: pd.Series, y_data: pd.Series, title: str, ylabel: str, color: str = 'blue', yerr: Optional[pd.Series] = None, label: Optional[str] = None) -> Any:
     """Helper function to setup consistent subplot formatting"""
     ax = plt.subplot(2, 2, pos)
-    ax.scatter(x_data, y_data, marker='o', s=3, color=color)
+    if yerr is not None:
+        ax.errorbar(x_data, y_data, yerr=yerr, fmt='o', markersize=3, color=color, ecolor='gray', alpha=0.7, capsize=2, label=label)
+    else:
+        ax.scatter(x_data, y_data, marker='o', s=3, color=color, label=label)
+    if label:
+        ax.legend()
     ax.set_title(title)
     ax.set_xlabel('Incident Angle (degrees)')
     ax.set_ylabel(ylabel)
@@ -329,10 +336,10 @@ def highlight_brewster_angles(ax, brewster_angles: List[Tuple], angle_offset: fl
 
             # Calculate text position - alternate between top and bottom for visibility
             if i % 2 == 0:
-                y_frac = 0.85  # 85% up the axis
+                y_frac = 0.65  # 65% up the axis
                 va = 'top'
             else:
-                y_frac = 0.65  # 65% up the axis
+                y_frac = 0.50  # 50% up the axis
                 va = 'bottom'
 
             # Add text label at the appropriate position using axis transform
@@ -346,7 +353,7 @@ def highlight_brewster_angles(ax, brewster_angles: List[Tuple], angle_offset: fl
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles, labels, loc='best')
 
-def process_angle_data(data_file: str) -> Tuple[pd.Series, pd.Series, float]:
+def process_angle_data(data_file: str) -> tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.Series, pd.Series, pd.Series]:
     """
     Process raw angle data from a CSV file into angles and intensities
 
@@ -354,7 +361,7 @@ def process_angle_data(data_file: str) -> Tuple[pd.Series, pd.Series, float]:
         data_file: Path to the CSV data file
 
     Returns:
-        Tuple of (angles, ldr_voltage_feedback, ldr_resistance, intensities)
+        Tuple of (angles, ldr_voltage_feedback, ldr_resistance, intensities, adc_stddev)
     """
     # Load the data
     data = pd.read_csv(data_file)
@@ -366,14 +373,33 @@ def process_angle_data(data_file: str) -> Tuple[pd.Series, pd.Series, float]:
     ldr_voltage_feedback = data['adc_mean'] * CONSTANTS["V_SUPPLY"] / CONSTANTS["ANALOG_RESOLUTION"]  # Convert ADC to voltage (0-5V range)
 
     # Calculate LDR resistance from voltage divider
-    # V_ldr = V_SUPPLY * R_FIXED / (R_ldr + R_FIXED)
-    # Solving for R_ldr: R_ldr = R_FIXED * (V_SUPPLY - ldr_voltage_feedback) / ldr_voltage_feedback
     ldr_resistance = CONSTANTS["R_FIXED"] * (CONSTANTS["V_SUPPLY"] - ldr_voltage_feedback) / ldr_voltage_feedback
 
     # Convert resistance to relative light intensity (I ∝ 1/R)
     intensities = 1.0 / ldr_resistance
 
-    return angles, ldr_voltage_feedback, ldr_resistance, intensities
+    # Extract adc_stddev
+    adc_stddev = data['adc_stddev']
+
+    # Error propagation for resistance
+    V = sp.Symbol('V')
+    Rf = CONSTANTS["R_FIXED"]
+    Vs = CONSTANTS["V_SUPPLY"]
+    R_expr = Rf * (Vs - V) / V
+    resistance_uncertainty = []
+    for v, dv in zip(ldr_voltage_feedback, adc_stddev * Vs / CONSTANTS["ANALOG_RESOLUTION"]):
+        resistance_uncertainty.append(propagate_error(R_expr, [V], {V: v}, {V: dv}))
+    resistance_uncertainty = pd.Series(resistance_uncertainty)
+
+    # Error propagation for intensity
+    I = sp.Symbol('I')
+    intensity_expr = 1 / R_expr
+    intensity_uncertainty = []
+    for v, dv in zip(ldr_voltage_feedback, adc_stddev * Vs / CONSTANTS["ANALOG_RESOLUTION"]):
+        intensity_uncertainty.append(propagate_error(intensity_expr, [V], {V: v}, {V: dv}))
+    intensity_uncertainty = pd.Series(intensity_uncertainty)
+
+    return angles, ldr_voltage_feedback, ldr_resistance, intensities, adc_stddev, resistance_uncertainty, intensity_uncertainty
 
 def create_brewster_plots(
     angles: pd.Series,
@@ -381,44 +407,59 @@ def create_brewster_plots(
     ldr_resistance: pd.Series,
     intensities: pd.Series,
     perpendicular_regions: List[Tuple],
-    brewster_angles: List[Tuple]
+    brewster_angles: List[Tuple],
+    adc_stddev: pd.Series,
+    resistance_uncertainty: pd.Series,
+    intensity_uncertainty: pd.Series,
 ) -> None:
     """
-    Create visualization plots for Brewster angle analysis
-
-    Args:
-        angles: Series of angles in degrees
-        ldr_voltage_feedback: Series of LDR voltage measurements
-        ldr_resistance: Series of LDR resistance values
-        intensities: Series of light intensities
-        perpendicular_regions: List of identified perpendicular regions
-        brewster_angles: List of identified Brewster angles
+    Create visualization plots for Brewster angle analysis, now with error bars
     """
     fig = plt.figure(figsize=(12, 8))
 
     # Determine the angle offset based on perpendicular regions
     angle_offset = 0
     if perpendicular_regions:
-        # Use the first perpendicular region as 0 degrees incident angle
         angle_offset = perpendicular_regions[0][1]  # Middle angle of first region
 
-    # Plot 1: Raw voltage
-    voltage_ax = setup_subplot(1, angles, ldr_voltage_feedback, 'LDR Voltage vs Angle', 'Voltage (V)', 'blue')
+    # Plot 1: Raw voltage (with error bars)
+    voltage_ax = setup_subplot(
+        1, angles,
+        ldr_voltage_feedback,
+        'LDR Voltage vs Angle',
+        'Voltage (V)',
+        'blue', yerr=adc_stddev * CONSTANTS["V_SUPPLY"] / CONSTANTS["ANALOG_RESOLUTION"],
+        label='LDR Voltage'
+    )
     relabel_x_axis(voltage_ax, angle_offset)
 
-    # Plot 2: Calculated resistance
-    resistance_ax = setup_subplot(2, angles, ldr_resistance, 'LDR Resistance vs Angle', 'Resistance (Ω)', 'green')
+    # Plot 2: Calculated resistance (with error bars)
+    resistance_ax = setup_subplot(
+        2,
+        angles, ldr_resistance,
+        'LDR Resistance vs Angle',
+        'Resistance (Ω)',
+        'green', yerr=resistance_uncertainty,
+        label='LDR Resistance'
+    )
     relabel_x_axis(resistance_ax, angle_offset)
+
+    # Plot 3: Light intensity with perpendicular regions (with error bars)
+    intensity_ax = setup_subplot(
+        3,
+        angles,
+        intensities,
+        'Light Intensity vs Angle (Brewster Angle Measurement)',
+        'Relative Light Intensity',
+        'red',
+        yerr=intensity_uncertainty,
+        label='Intensity'
+    )
+    relabel_x_axis(intensity_ax, angle_offset)
 
     # Calculate gradient for visualization
     gradient = np.gradient(intensities, angles)
     smoothed_gradient = np.convolve(gradient, np.ones(25)/25, mode='same')
-
-    # Plot 3: Light intensity with perpendicular regions
-    intensity_ax = setup_subplot(3, angles, intensities,
-                              'Light Intensity vs Angle (Brewster Angle Measurement)',
-                              'Relative Light Intensity', 'red')
-    relabel_x_axis(intensity_ax, angle_offset)
 
     # Plot 4: Gradient visualization
     gradient_ax = plt.subplot(2, 2, 4)
@@ -440,23 +481,13 @@ def create_brewster_plots(
     plt.tight_layout()
     plt.show()
 
-def plot_brewster_angle(data_file: str) -> Tuple[pd.Series, pd.Series, List[Tuple], List[Tuple]]:
+def plot_brewster_angle(data_file: str, angle_uncertainty: float = 1.0):
     """
     Process and plot Brewster angle data from a CSV file.
-
-    Args:
-        data_file: Name of the CSV data file to analyze
-
-    Returns:
-        Tuple containing:
-        - angles: Series of angles in degrees
-        - intensities: Series of light intensities
-        - perpendicular_regions: List of identified perpendicular angle regions
-        - brewster_angles: List of identified Brewster angles
     """
     # Load and process the data
     data_path = os.path.join(DATA_DIR, data_file)
-    angles, ldr_voltage_feedback, ldr_resistance, intensities = process_angle_data(data_path)
+    angles, ldr_voltage_feedback, ldr_resistance, intensities, adc_stddev, resistance_uncertainty, intensity_uncertainty = process_angle_data(data_path)
 
     # Identify perpendicular angles (where laser is perpendicular to surface)
     perpendicular_regions = identify_perpendicular_angles(angles, intensities)
@@ -466,7 +497,9 @@ def plot_brewster_angle(data_file: str) -> Tuple[pd.Series, pd.Series, List[Tupl
 
     # Create the plots
     create_brewster_plots(angles, ldr_voltage_feedback, ldr_resistance, intensities,
-                       perpendicular_regions, brewster_angles)
+                       perpendicular_regions, brewster_angles, adc_stddev,
+                       resistance_uncertainty, intensity_uncertainty,
+                       )
 
     return angles, intensities, perpendicular_regions, brewster_angles
 
@@ -546,6 +579,7 @@ def report_brewster_angles(
     # Group the Brewster angles by their associated perpendicular region
     brewster_by_region = {}
     for angle, idx, region_id in brewster_angles:
+        region_id = int(region_id)  # Ensure region_id is an integer
         if region_id not in brewster_by_region:
             brewster_by_region[region_id] = []
         brewster_by_region[region_id].append((angle, idx))
