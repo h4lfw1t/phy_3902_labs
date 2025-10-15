@@ -38,7 +38,7 @@ def plot_malus_law(data_file):
     # Plot the data
     plt.figure(figsize=(10, 6))
     plt.errorbar(angles, ldr_voltage_feedback, yerr=ldr_voltage_stddev, label='LDR Voltage Feedback', marker='o', linestyle='None', markersize=3, color='blue', ecolor='lightgray', elinewidth=1, capsize=2)
-    plt.title('Malus Law Experiment (Shifted)')
+    plt.title("Malus' Law: Angle vs LDR Voltage")
     plt.xlabel('Angle (degrees)')
     plt.ylabel('LDR Voltage (V)')
     plt.xticks(np.arange(0, 361, 30))
