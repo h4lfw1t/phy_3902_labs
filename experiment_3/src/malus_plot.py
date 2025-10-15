@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -5,22 +6,42 @@ import matplotlib.pyplot as plt
 # Define the path to the data files
 data_dir = "../data/malus"
 
+CONSTANTS = {
+    "V_SUPPLY": 5.0,  # Supply voltage in volts
+    "R_FIXED": 9955,  # Fixed resistor value in ohms
+    "STEPPER_STEPS_PER_REV": 2048,  # Steps per revolution for the stepper motor
+    "ANALOG_RESOLUTION": 1023, # 10-bit ADC resolution
+}
+
 def plot_malus_law(data_file):
     # Load the data
     data_path = os.path.join(data_dir, data_file)
     data = pd.read_csv(data_path)
     
-    # Extract angle and intensity
-    angles = 360 * data['step'] / 2048  # Convert steps to degrees
-    ldr_voltage_feedback = data['adc_mean'] * 5.0 / 1023.0  # Convert ADC to voltage (0-5V range)
-    ldr_voltage_stddev = data['adc_stddev'] * 5.0 / 1023.0  # Convert ADC stddev to voltage stddev
+    # Extract angle and intensity data
+    angles = 360 * data['step'] / CONSTANTS["STEPPER_STEPS_PER_REV"]  # Convert steps to degrees
+    ldr_voltage_feedback = data['adc_mean'] * CONSTANTS["V_SUPPLY"] / CONSTANTS["ANALOG_RESOLUTION"]  # Convert ADC to voltage (0-5V range)
+    ldr_voltage_stddev = data['adc_stddev'] * CONSTANTS["V_SUPPLY"] / CONSTANTS["ANALOG_RESOLUTION"]  # Convert ADC stddev to voltage stddev
+
+    # Find index of first maximum
+    first_max_idx = np.argmax(ldr_voltage_feedback)
+
+    # Roll arrays so first maximum is at index 0
+    angles = np.roll(angles, -first_max_idx)
+    ldr_voltage_feedback = np.roll(ldr_voltage_feedback, -first_max_idx)
+    ldr_voltage_stddev = np.roll(ldr_voltage_stddev, -first_max_idx)
+
+    # Shift angles so that first maximum is at 0 and wrap around
+    angles = angles - angles[0]
+    angles = np.mod(angles, 360)
 
     # Plot the data
     plt.figure(figsize=(10, 6))
     plt.errorbar(angles, ldr_voltage_feedback, yerr=ldr_voltage_stddev, label='LDR Voltage Feedback', marker='o', linestyle='None', markersize=3, color='blue', ecolor='lightgray', elinewidth=1, capsize=2)
-    plt.title('Malus Law Experiment')
+    plt.title('Malus Law Experiment (Shifted)')
     plt.xlabel('Angle (degrees)')
     plt.ylabel('LDR Voltage (V)')
+    plt.xticks(np.arange(0, 361, 30))
     plt.grid()
     plt.legend()
     plt.show()
