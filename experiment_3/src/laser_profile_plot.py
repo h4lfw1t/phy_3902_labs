@@ -9,7 +9,7 @@ CONSTANTS = {
     "R_FIXED": 9955,  # Fixed resistor value in ohms, not used in current calculations
     "ANALOG_RESOLUTION": 1023, # 10-bit ADC resolution
 }
-DATA_PATH = '../data/laser_profile/laser_profile.csv'
+DATA_DIR = '../data/laser_profile/'
 
 
 def load_data(path):
@@ -31,8 +31,8 @@ def calculate_intensity(df):
     return result_df
 
 
-def plot_laser_profile(intensity_df):
-    """Plot intensity and its derivative in subplots."""
+def plot_laser_profile(intensity_df, out_path):
+    """Plot intensity and its derivative in subplots, save to out_path."""
     # Sort by position
     sorted_df = intensity_df.sort_values('position')
     positions = sorted_df['position'].values
@@ -68,19 +68,25 @@ def plot_laser_profile(intensity_df):
     axes[0].set_xticks(xticks)
 
     plt.tight_layout()
-    # Ensure output directory exists
-    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../out'))
-    os.makedirs(out_dir, exist_ok=True)
-    # Save plot to out directory
-    out_path = os.path.join(out_dir, 'laser_profile_plot.png')
     plt.savefig(out_path)
-    plt.show()
+    plt.close(fig)
 
 
 def main():
-    df = load_data(DATA_PATH)
-    intensity_df = calculate_intensity(df)
-    plot_laser_profile(intensity_df)
+    # Ensure output directory exists
+    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../out'))
+    os.makedirs(out_dir, exist_ok=True)
+    # List all CSV files in DATA_DIR
+    data_dir_abs = os.path.abspath(os.path.join(os.path.dirname(__file__), DATA_DIR))
+    for fname in os.listdir(data_dir_abs):
+        if fname.lower().endswith('.csv'):
+            csv_path = os.path.join(data_dir_abs, fname)
+            df = load_data(csv_path)
+            intensity_df = calculate_intensity(df)
+            png_name = os.path.splitext(fname)[0] + '.png'
+            out_path = os.path.join(out_dir, png_name)
+            plot_laser_profile(intensity_df, out_path)
+            print(f"Plotted {csv_path} -> {out_path}")
 
 
 if __name__ == "__main__":
