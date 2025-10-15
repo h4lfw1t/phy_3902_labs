@@ -21,15 +21,3 @@ def propagate_error(R_expr, variables, values, uncertainties):
         total += (partial_val ** 2) * (delta ** 2)
     return np.sqrt(total)
 
-# Example usage
-def example():
-    x, y = sp.symbols('x y')
-    R = x * y
-    values = {x: 2, y: 3}
-    uncertainties = {x: 0.1, y: 0.2}
-    delta_R = propagate_error(R, [x, y], values, uncertainties)
-    print(f"Propagated uncertainty ΔR: {delta_R}")
-
-if __name__ == "__main__":
-    example()
-
