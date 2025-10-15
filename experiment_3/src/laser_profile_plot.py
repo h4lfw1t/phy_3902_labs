@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 CONSTANTS = {
     "V_SUPPLY": 5.0,  # Supply voltage in volts
@@ -67,6 +68,12 @@ def plot_laser_profile(intensity_df):
     axes[0].set_xticks(xticks)
 
     plt.tight_layout()
+    # Ensure output directory exists
+    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../out'))
+    os.makedirs(out_dir, exist_ok=True)
+    # Save plot to out directory
+    out_path = os.path.join(out_dir, 'laser_profile_plot.png')
+    plt.savefig(out_path)
     plt.show()
 
 

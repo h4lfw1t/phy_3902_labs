@@ -479,6 +479,12 @@ def create_brewster_plots(
     highlight_brewster_angles(gradient_ax, brewster_angles, angle_offset)
 
     plt.tight_layout()
+    # Ensure output directory exists
+    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../out'))
+    os.makedirs(out_dir, exist_ok=True)
+    # Save plot to out directory
+    out_path = os.path.join(out_dir, 'brewster_plot.png')
+    plt.savefig(out_path)
     plt.show()
 
 def plot_brewster_angle(data_file: str, angle_uncertainty: float = 1.0):

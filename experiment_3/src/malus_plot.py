@@ -44,6 +44,12 @@ def plot_malus_law(data_file):
     plt.xticks(np.arange(0, 361, 30))
     plt.grid()
     plt.legend()
+    # Ensure output directory exists
+    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../out'))
+    os.makedirs(out_dir, exist_ok=True)
+    # Save plot to out directory
+    out_path = os.path.join(out_dir, f"malus_plot_{os.path.splitext(data_file)[0]}.png")
+    plt.savefig(out_path)
     plt.show()
 
 def main():
