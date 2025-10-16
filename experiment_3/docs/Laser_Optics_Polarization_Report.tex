@@ -1,0 +1,227 @@
+% PHY 3902 Experiment 3 Lab Report
+% Author: Michelle Johnstone, Patrick Geraghty
+% Affiliation: University of Ottawa
+% Date: October 15, 2025
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf,it]{caption}
+
+% Python and Arduino code formatting
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b,
+  inputencoding=utf8
+}
+
+\begin{document}
+
+% Title
+\begin{center}
+    {\LARGE\bfseries PHY 3902 Experiment 3 Lab Report}\\[1.5em]
+    {\large Author(s): Michelle Johnstone, Patrick Geraghty}\\
+    {\large Affiliation: University of Ottawa}\\
+    {\large Date: October 15, 2025}
+\end{center}
+
+% Abstract
+\section*{Abstract}
+This experiment aimed to characterize the optical properties of a 650 nm laser diode using a light-dependent resistor (LDR) to measure beam intensity.
+The investigation proceeded in three parts: polarization analysis, determination of Brewster's angle, and measurement of the beam aspect ratio.
+A linear polarized filter was rotated in the beam path to analyze polarization, revealing a sinusoidal dependence of intensity on the filter angle, confirming the beam was partially linearly polarized.
+Brewster's angle was determined by analyzing intensity changes as the beam reflected off a glass slide at varying incident angles, yielding a measured value of 56∘, which is in close agreement with the theoretical value of 56.3∘ for the glass used.
+Finally, the aspect ratio of the beam was calculated by integrating the intensity distribution on orthogonal axes, showing a beam profile that was near Gaussian but with a minor asymmetry.
+These results provide a comprehensive characterization of the laser's beam quality and polarization state, which is essential for its application in precision optical systems.
+
+% Introduction
+\section{Introduction}
+
+\subsection{Malus' Law and Linear Polarization}
+
+A linear polarizer, often called an analyzer, functions by limiting the electric field vector of incident electromagnetic radiation to oscillate in just one specific plane.
+When a light beam is already linearly polarized (e.g., after passing through a first polarizing filter), and then encounters a second linearly polarizing filter (the analyzer), the resulting transmitted light intensity is governed by Malus's Law.
+If the light incident on the analyzer has intensity $I_0$, the intensity $I$ transmitted through the analyzer is proportional to the square of the cosine of the angle θ between the light's polarization axis and the analyzer's transmission axis:
+\begin{equation}
+I = I_0 \cos^2(\theta)
+\label{eq:malus}
+\end{equation}
+This relationship mathematically describes how the intensity changes as the angle of the analyzer is varied.
+When the analyzer's transmission axis is aligned with the incident polarization ($\theta = 0^{\circ}$), the transmitted intensity is at its maximum ($I=I_0$).
+Conversely, when the analyzer is oriented orthogonal (perpendicular) to the incident polarization ($\theta = 90^{\circ}$ or $270^{\circ}$), the transmitted intensity is at its minimum ($I=0$).
+This characteristic sinusoidal $cos^2$ relationship is thus a key method for experimentally verifying the degree and orientation of a beam's linear polarization.
+
+\subsection{Brewster's Angle and Refraction}
+Brewster's angle is the angle of incidence at which, when unpolarized light hits a barrier between two media, the reflected ray is perfectly polarized and the transmitted ray is partially polarized. When p-polarized light is incident on a barrier, the light is entirely transmitted; none of it is reflected. This is due to a phenomenon where the only light reflected from the medium is s-polarized because the reflected and refracted rays are 90° apart. At Brewster's angle, the electric field of the p-polarized light, which oscillates perpendicular to the wave's direction of propagation, would need to oscillate in the direction of the transmitted ray, whereas the electric field of the s-polarized light oscillates perpendicular to the angle of incidence and is reflected. Thus, all of the light is focused into the medium when the incident wave is p-polarized. The determination of Brewster's angle $\theta_B$ is dependent entirely on the indices of refraction of the two media on either side of the barrier. The theoretical value for the expected angle of incidence at which there is no reflected light can be easily calculated using:
+\begin{equation}
+\theta_{B} = \arctan\left(\frac{n_{2}}{n_{1}}\right)
+\end{equation}
+where $n_1$ is the index of refraction of the first medium and $n_2$ the index of refraction of the medium the laser beam is propagating into.
+
+\subsection{Laser Beam Profile and Aspect Ratio}
+For the final portion, the Gaussian intensity profile and aspect ratio of the laser beam were investigated.
+This was accomplished by placing a sharp edge on a translational stage in front of the beam and moving it perpendicular to the beam's axis to slowly block the light.
+As the beam is progressively obscured, the measured integrated intensity distribution follows an error function (erf):
+\begin{equation}
+erf(x) = \frac{2}{\sqrt{\pi}}\int_0^x e^{-t^2} dt
+\end{equation}
+The derivative of this integrated intensity distribution is the underlying Gaussian function $f(x) = e^{-x^2}$, which accurately models the cross-sectional intensity of the laser beam.
+By plotting this derivative and fitting a Gaussian curve to the data, we can precisely determine the key parameters of the beam profile.
+Specifically, the beam width is determined by calculating the full width at half maximum (FWHM) of the fitted Gaussian curve along both the major and minor axes.
+
+This Gaussian profile dictates that the beam's center is the brightest, with intensity diminishing proportionally to the square of the distance from the center.
+Since most low-end laser diodes do not produce perfectly circular beams, the eccentricity is quantified by the aspect ratio:
+\begin{equation}
+\text{aspect ratio} = \frac{\text{minor axis length}}{\text{major axis length}}
+\end{equation}
+This ratio is calculated using the measured FWHM values, where a value of 1 represents a perfect circular beam and values less than 1 indicate an elliptical shape.
+
+% Methods
+\section{Methods}
+For this experiment, the required equipment was few and inexpensive with a fairly simple set up.
+The laser diode was affixed to a 3D printed stand, and the LDR was set up at equivalent heights with enough separation to allow for the rotating slide to fit in between.
+The setup was stuck to the workbench using tack and tape in an attempt to stop the components from shifting.
+A linearly polarizing filter was then attached to a stepper motor on a stand, and the maximum intensity was recorded as the filter was rotated in increments of roughly 0.87° to get a good approximation of the direction of the laser beam's linear polarization to align the laser for the following steps.
+The first experiment was to analyze polarization by using a stepper motor to slowly turn a linearly polarizing filter in the beam path while measuring the resistance value of the LDR, which is inversely proportional to the intensity.
+The value of resistance was then graphed as a function of the angle of the filter relative to the starting point.
+Due to the relationship of the alignment being sinusoidal, using the change in angle of the filter's orientation is an acceptable way of graphing this relation.
+
+The goal for the second section was to investigate Brewster's angle using a 3D printed fitted adaptor to attach a glass microscope slide to a stepper motor so the slide could be moved at increments of 0.18°.
+The motor was placed so the axis of rotation of the slide was centered on the beam path, so that the incident angle was most accurate and could be rotated 360° to attain multiple readings for Brewster's and achieve the highest accuracy.
+The following figure shows the experimental setup used for this portion of the experiment.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/brewster_circuit.jpg}
+    \caption{Image of the experimental setup of the Brewster angle calculation with the laser beam propagating through the first linearly polarizing filter mounted to the laser stand, then through the glass mounted to the stepper motor and finally into the LDR all connected to the Arduino Uno.}
+    \label{fig:brewster_setup}
+\end{figure}
+
+
+The final experimental procedure focused on characterizing the spatial properties of the 650 nm laser beam by measuring its intensity profile and aspect ratio.
+To achieve this, the glass slide setup was replaced with a knife-edge (sharp-edged object) mounted on a translational stage driven by a servo motor.
+The knife-edge was positioned directly in front of the laser aimed at the light-dependant resistor (LDR).
+The servo motor was programmed to move the knife-edge slowly and precisely across the beam, starting from a position that fully blocks the light and moving until the entire beam exposes the LDR .
+The LDR current (proportional to integrated intensity) was recorded as a function of the knife-edge's linear position (servo rotation angle, which is proportional to linear distance).
+The raw data collected represents the integrated intensity distribution, which mathematically follows an error function (erf).
+To determine the fundamental intensity profile, the recorded data was numerically differentiated with respect to the knife-edge position.
+This derivative yields the Gaussian intensity distribution (the beam profile) along the axis of measurement.
+The full width at half maximum (FWHM) was then calculated for this fitted Gaussian curve.
+The FWHM is calculated using the formula:
+\begin{equation}
+\text{FWHM} = 2\sqrt{2\ln(2)}\sigma \approx 2.355\sigma
+\end{equation}
+where $\sigma$ is the standard deviation of the Gaussian fit.
+This FWHM value serves as the measured \textbf{beam width} along that specific axis.
+Since the laser diode beam was expected to be elliptical (not a perfect circle), the beam width measurement was performed on two orthogonal axes to determine the eccentricity:
+
+\begin{enumerate}
+\item \textbf{First Measurement:} The FWHM was calculated along the axis \textbf{perpendicular} to the laser's partial linear polarization (e.g., the minor axis).
+\item \textbf{Second Measurement:} The laser source was physically rotated 90∘ to align the knife-edge movement with the orthogonal axis (e.g., the major axis), and the FWHM was calculated again.
+\end{enumerate}
+These two FWHM values define the lengths of the beam's minor and major axes.
+The final aspect ratio was then calculated as the ratio of the minor axis length to the major axis length:
+\begin{equation}
+\text{Aspect Ratio} = \frac{\text{FWHM}_{\text{minor axis}}}{\text{FWHM}_{\text{major axis}}}
+\end{equation}
+This dual-axis FWHM method provides a precise, quantitative measurement of the beam's elliptical profile.
+
+% Results and Discussion
+\section{Results and Discussion}
+The first portion of the lab that involved determining any inherent polarization of the beam returned a clear partial linear polarization.
+With this, the beam was aligned with the partial polarization direction placed vertically with a filter in the same orientation to obtain the maximum power in the transmitted beam, then the second filter was rotated to produce Figure~\ref{fig:malus}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/malus_plot_double_polarizer.png}
+    \caption{The intensity recorded by the LDR of the linearly polarized laser beam as a function of the relative angle of the linearly polarizing filter to the direction of oscillation of the electric field. The function is as depicted in equation~\ref{eq:malus} with the upper intensity limit equivalent to the incident beam.}
+    \label{fig:malus}
+\end{figure}
+The values obtained were very close to the expected values and well represented Malus' Law; the noise was well mitigated by averaging 100 counts at each increment, as is evident by the minimal error bars on the graph and the mean standard deviation of 0.2.
+Polarizing a beam allows for the direction of oscillation of the electric field to be controlled as well as the intensity, which has countless implementations in spectroscopy and microscopy as well as electrical insulation.
+
+
+The resulting graph for the Brewster Angle analysis required more noise reduction than the other two experiments to get a clear result for the peak transmission.
+The maximum on the curve of the graph of intensity as a function of angle, or the minimum value on the graph of resistance as a function of angle, indicates when the reflected light is entirely s-polarized or, in the case of the experiment where p-polarized light was used, the reflection disappears and all the light is transmitted.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/brewster_plot.png}
+    \caption{The intensity recorded by the LDR of the vertically polarized beam through the rotating glass slide as a function of the angle of incidence over one full rotation. The maximum value of the function indicates Brewster's angle, determined to be 56° with an error value of 0.5\% difference.}
+    \label{fig:brewster}
+\end{figure}
+The mean standard deviation of 0.3 is indicative of effective error reduction methods that included minimizing light interference, adding delays between measurements, and ensuring precise alignment.
+These results not only verify the validity of the Brewster Angle principle but also have many applications in everything from camera image quality and optical devices to measuring refractive indices.
+
+
+The beam's intensity distribution was found to adhere closely to a Gaussian profile, a standard characteristic for this type of laser source.
+The raw data collected from the knife-edge scanning setup yielded a curve representing the integrated intensity distribution (the error function, erf(x)).
+This raw intensity data was processed by taking its numerical derivative, which transforms the integrated erf(x) function back into the fundamental Gaussian intensity function.
+This Gaussian curve directly represents the beam's intensity profile across the plane of incidence.
+
+To quantify the beam's shape, the full width at half maximum (FWHM) was calculated from the fitted Gaussian curves for two orthogonal axes: the major axis and the minor axis.
+This two-axis FWHM approach accounts for the inherent ellipticity of laser diode output.
+An aspect ratio of 0.931 indicates that the beam is nearly circular, with only a slight degree of ellipticity (a perfect circle being 1.0).
+This minor deviation is typical for low-cost laser diodes, which rarely achieve a perfectly symmetric output without additional corrective optics.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/combined_analysis.png}
+    \caption{Top: The intensity recorded by the LDR of the unpolarized laser beam while the knife edge slowly covers the beam as a function of the distance traveled by the blade covering it. Bottom: The gradient of the intensity curve, showing the bell curve indicating the beam profile with the highest intensity at the center of the beam, wherefrom it tapers.}
+    \label{fig:profile}
+\end{figure}
+The data recorded by the experiment was fairly accurate to the expected function shape; however, due to potential interference, one side of the graph is quite flat relative to the other, indicating several possible errors, including outside interference with the LDR or dirt and grease on the LDR or the laser lens, as well as a misalignment of the beam to the LDR. If the beam is not hitting the LDR straight on, likely, the already misshapen beam was further altered, skewing the results for both the Gaussian and the ratio. The measurements were taken from the major and minor axis bell curves and divided; the values for the difference in distance had the same accuracy as the measurements for the error function as they were found by the code thus 0.18°.
+
+Uncertainties were estimated based on the resolution of the stepper motor and the sensitivity of the LDR, with error sources including alignment, ambient light, and detector nonlinearity.
+
+% Conclusion
+\section{Conclusion}
+The experiment was able to adequately demonstrate the expected graph of the sinusoidal curve created by rotating a linearly polarized filter in front of a linearly polarized beam as well as Brewster's angle of incidence at which a beam polarized parallel to the plane of incidence is fully transmitted with no reflection. Brewster's angle for glass was expected to be 56.3° but was found to be roughly 56° with an error of 0.5%. Finally, the Gaussian bell curve for the incident distribution had the least accuracy as the graph of the gradient of the intensity significantly favoured one side due to a number of potential reasons including oversaturation of the diode and a misalignment of the laser and the LDR.
+
+% References
+\section{References}
+\begin{thebibliography}{99}
+    \bibitem{ref1} Hecht, E., \textit{Optics} (5th ed.), Pearson, 2017.
+    \bibitem{ref2} Michel Godin, \url{https://uottawa.brightspace.com/content/enforced/523665-2259FS0268421B00/PHY%203902_LED_E_2023.pdf}, 2025.
+    \bibitem{ref3} R\"udiger Paschotta (RP), \url{https://www.rp-photonics.com/brewster_s_angle.html}, 2025.
+    \bibitem{ref4} Vinod Chugani, \url{https://www.datacamp.com/tutorial/gaussian-distribution}, 2025.
+\end{thebibliography}
+
+
+% Supplementary Code
+\appendix
+\section{Supplementary Code}
+\subsection*{Python Scripts}
+
+    \lstinputlisting[language=Python,caption={malus\_plot.py: Python script to analyze and plot intensity data of a laser beam through a rotating analyzer.},label={lst:malus_plot}]{../src/malus_plot.py}
+    \lstinputlisting[language=Python,caption={brewster\_plot.py: Python script to analyze and plot intensity data of a laser beam incident with a rotating glass slide.},label={lst:brewster_plot}]{../src/brewster_plot.py}
+    \lstinputlisting[language=Python,caption={laser\_profile_plot.py: Python script to analyze and plot intensity data of a laser beam as it is sequentially uncovered by a knife-edge.},label={lst:laser_profile_plot}]{../src/laser_profile_analysis.py}
+
+\subsection*{Util Classes}
+
+    \lstinputlisting[language=Python,caption={constants.py: Shared constants},label={lst:constants}]{../src/utils/constants.py}
+    \lstinputlisting[language=Python,caption={data_processor.py: Shared methods for processing data.},label={lst:data_processor}]{../src/utils/data_processor.py}
+    \lstinputlisting[language=Python,caption={error_propagation.py: Generalized error propagation class.},label={lst:error_propagation}]{../src/utils/error_propagation.py}
+    \lstinputlisting[language=Python,caption={file_manager.py: Simplified file read/write API.},label={lst:file_manager}]{../src/utils/file_manager.py}
+    \lstinputlisting[language=Python},caption={plot_helper.py: Generalized plotting utilities.},label={lst:plot_helper}]{../src/utils/plot_helper.py}
+
+\subsection*{Arduino Sketches}
+
+    \lstinputlisting[language=C,caption={laser\_setup.ino: Simple Arduino sketch to verify laser-LDR setup.},label={lst:laser_setup}]{../src/laser_setup/laser_setup.ino}
+    \lstinputlisting[language=C,caption={laser\_properties\_stepper.ino: Arduino sketch to start a laser and rotate a stepper motor through a series of angles while measuring the feedback of an LDR.},label={lst:laser_properties_stepper}]{../src/laser_properties_stepper/laser_properties_stepper.ino}
+    \lstinputlisting[language=C,caption={CSVPrinter.h: Custom header file to enable easier data collection by printing strings as CSVs to the serial monitor.},label={lst:CSVPrinter}]{../src/laser_profile_calibration/CSVPrinter.h}
+    \lstinputlisting[language=C,caption={laser\_profile\_calibration.ino: Arduino sketch to slowly rotate a servo motor to reveal and record the intensity of a laser via LDR feedback.},label={lst:laser_profile_calibration}]{../src/laser_profile_calibration/laser_profile_calibration.ino}
+
+% End of document
+\end{document}
