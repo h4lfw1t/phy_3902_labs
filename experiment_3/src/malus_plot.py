@@ -9,49 +9,40 @@ between two polarizing filters.
 
 import os
 from dataclasses import dataclass
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, Dict, Any
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from utils import (
+    BaseConstants,
+    BaseConfig,
+    FileManager,
+    DataProcessor as BaseDataProcessor,
+    PlotHelper as BasePlotHelper,
+)
+
 
 @dataclass
-class Constants:
-    """Constants used in Malus' Law analysis."""
-    V_SUPPLY: float = 5.0            # Supply voltage (V)
-    R_FIXED: float = 9955            # Fixed resistor value (ohms)
-    STEPPER_STEPS_PER_REV: int = 2048  # Steps per revolution for the stepper motor
-    ANALOG_RESOLUTION: int = 1023    # 10-bit ADC resolution
+class MalusConstants(BaseConstants):
+    """Constants specific to Malus' Law analysis."""
+    # Inherits common constants from BaseConstants
 
 
 @dataclass
-class Config:
-    """Configuration parameters for file paths."""
-    DATA_DIR: str = '../data/malus/'
-    OUT_DIR: str = '../out/'
+class MalusConfig(BaseConfig):
+    """Configuration parameters for Malus' Law analysis."""
+    DATA_DIR: str = '../data/malus/'  # Data directory specific to Malus experiment
 
 
 # Global instances
-CONSTANTS = Constants()
-CONFIG = Config()
+CONSTANTS = MalusConstants()
+CONFIG = MalusConfig()
 
 
-class DataProcessor:
-    """Handles data loading and processing for Malus' Law analysis."""
-
-    @staticmethod
-    def load_data(data_file: str) -> pd.DataFrame:
-        """
-        Load CSV data from file.
-
-        Args:
-            data_file: Path to the CSV data file
-
-        Returns:
-            DataFrame containing the loaded data
-        """
-        return pd.read_csv(data_file)
+class MalusDataProcessor(BaseDataProcessor):
+    """Handles data processing for Malus' Law analysis."""
 
     @staticmethod
     def process_angle_data(data: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -65,9 +56,11 @@ class DataProcessor:
             Tuple of (angles, ldr_voltage_feedback, ldr_voltage_stddev)
         """
         # Extract angle and intensity data
-        angles = 360 * data['step'] / CONSTANTS.STEPPER_STEPS_PER_REV  # Convert steps to degrees
-        ldr_voltage_feedback = data['adc_mean'] * CONSTANTS.V_SUPPLY / CONSTANTS.ANALOG_RESOLUTION
-        ldr_voltage_stddev = data['adc_stddev'] * CONSTANTS.V_SUPPLY / CONSTANTS.ANALOG_RESOLUTION
+        angles = BaseDataProcessor.steps_to_degrees(data['step'], CONSTANTS.STEPPER_STEPS_PER_REV)
+        ldr_voltage_feedback = BaseDataProcessor.adc_to_voltage(
+            data['adc_mean'], CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION)
+        ldr_voltage_stddev = BaseDataProcessor.adc_to_voltage(
+            data['adc_stddev'], CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION)
 
         # Find index of first maximum
         first_max_idx = np.argmax(ldr_voltage_feedback)
@@ -84,8 +77,8 @@ class DataProcessor:
         return angles, ldr_voltage_feedback, ldr_voltage_stddev
 
 
-class PlotHelper:
-    """Helper methods for plotting and visualization of Malus' Law data."""
+class MalusPlotHelper(BasePlotHelper):
+    """Helper methods for plotting Malus' Law data."""
 
     @staticmethod
     def create_malus_plot(
@@ -106,7 +99,7 @@ class PlotHelper:
         Returns:
             The matplotlib Figure object
         """
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = BasePlotHelper.setup_basic_figure()
 
         # Plot measured data with error bars
         ax.errorbar(
@@ -146,8 +139,9 @@ class MalusLawAnalyzer:
 
     def __init__(self):
         """Initialize the analyzer with required components."""
-        self.data_processor = DataProcessor()
-        self.plot_helper = PlotHelper()
+        self.file_manager = FileManager()
+        self.data_processor = MalusDataProcessor()
+        self.plot_helper = MalusPlotHelper()
 
     def plot_malus_law_data(self, data_file: str) -> Dict[str, Any]:
         """
@@ -163,7 +157,7 @@ class MalusLawAnalyzer:
         base_filename = os.path.splitext(os.path.basename(data_file))[0]
 
         # Load and process data
-        data = self.data_processor.load_data(data_file)
+        data = self.file_manager.load_csv_data(data_file)
         angles, voltages, voltage_stddev = self.data_processor.process_angle_data(data)
 
         # Create plot
@@ -174,13 +168,11 @@ class MalusLawAnalyzer:
             title=f"Malus' Law: {base_filename}"
         )
 
-        # Ensure output directory exists
-        out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), CONFIG.OUT_DIR))
-        os.makedirs(out_dir, exist_ok=True)
+        # Ensure output directory exists and save plot
+        out_dir = self.file_manager.ensure_output_directory(CONFIG.OUT_DIR)
+        out_filename = f"malus_plot_{base_filename}.png"
+        out_path = self.plot_helper.save_figure(fig, out_filename, out_dir)
 
-        # Save plot
-        out_path = os.path.join(out_dir, f"malus_plot_{base_filename}.png")
-        fig.savefig(out_path)
         plt.show()
         plt.close(fig)
 
