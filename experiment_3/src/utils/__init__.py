@@ -7,14 +7,16 @@ including data processing, plotting, and analysis functions.
 """
 
 from .constants import BaseConstants, BaseConfig
-from .file_manager import FileManager
 from .data_processor import DataProcessor
+from .error_propagation import ErrorPropagation
+from .file_manager import FileManager
 from .plot_helper import PlotHelper
 
 __all__ = [
     'BaseConstants',
     'BaseConfig',
-    'FileManager',
     'DataProcessor',
+    'ErrorPropagation',
+    'FileManager',
     'PlotHelper'
 ]
