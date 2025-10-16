@@ -16,83 +16,36 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+from utils import (
+    BaseConstants,
+    BaseConfig,
+    FileManager,
+    DataProcessor,
+    PlotHelper,
+    ErrorPropagation
+)
 
 # Constants
 @dataclass
-class Constants:
+class ProfileConstants(BaseConstants):
     """Constants used in the laser profile analysis."""
-    V_SUPPLY: float = 5.0  # Supply voltage in volts
-    R_FIXED: float = 9955  # Fixed resistor value in ohms
-    ANALOG_RESOLUTION: int = 1023  # 10-bit ADC resolution
+    # Inherits common constants from BaseConstants
 
 
 # Configuration
 @dataclass
-class Config:
-    """Configuration for file paths."""
+class ProfileConfig(BaseConfig):
+    """Configuration parameters for laser profile analysis."""
     DATA_DIR: str = '../data/laser_profile/'
-    OUT_DIR: str = '../out/'
 
 
 # Global instances
-CONSTANTS = Constants()
-CONFIG = Config()
+CONSTANTS = ProfileConstants()
+CONFIG = ProfileConfig()
 
 
-class DataLoader:
-    """Handles loading and preprocessing of laser profile data."""
-
-    @staticmethod
-    def load_data(path: str) -> pd.DataFrame:
-        """
-        Load CSV data and return as DataFrame.
-
-        Args:
-            path: Path to the CSV file
-
-        Returns:
-            DataFrame containing the loaded data
-        """
-        return pd.read_csv(path, index_col=False)
-
-    @staticmethod
-    def calculate_intensity(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate intensity and its standard deviation from LDR readings.
-
-        Args:
-            df: DataFrame with ldr_mean and ldr_stddev columns
-
-        Returns:
-            DataFrame with position, intensity, and intensity_stddev
-        """
-        ldr_voltage = df['ldr_mean'] * CONSTANTS.V_SUPPLY / CONSTANTS.ANALOG_RESOLUTION
-        ldr_voltage_stddev = df['ldr_stddev'] * CONSTANTS.V_SUPPLY / CONSTANTS.ANALOG_RESOLUTION
-        intensity = 1 / ldr_voltage
-        intensity_stddev = ldr_voltage_stddev / (ldr_voltage ** 2)
-
-        return pd.DataFrame({
-            'position': df['position'],
-            'intensity': intensity,
-            'intensity_stddev': intensity_stddev
-        })
-
-
-class MathUtils:
-    """Mathematical utility functions for data processing."""
-
-    @staticmethod
-    def degrees_to_radians(degrees: np.ndarray) -> np.ndarray:
-        """
-        Convert degrees to radians.
-
-        Args:
-            degrees: Array of values in degrees
-
-        Returns:
-            Array of values in radians
-        """
-        return np.deg2rad(degrees)
+class GaussianFitter:
+    """Fits Gaussian distributions to laser profile data."""
 
     @staticmethod
     def gaussian(x: np.ndarray, a: float, x0: float, sigma: float) -> np.ndarray:
@@ -110,13 +63,6 @@ class MathUtils:
         """
         return a * np.exp(-(x - x0)**2 / (2 * sigma**2))
 
-
-class GaussianFitter:
-    """Fits Gaussian distributions to laser profile data."""
-
-    def __init__(self):
-        self.math_utils = MathUtils()
-
     def fit_gaussian_to_derivative(
         self,
         positions_rad: np.ndarray,
@@ -131,7 +77,7 @@ class GaussianFitter:
 
         Returns:
             Tuple containing:
-            - ROI positions
+            - Region of interest (ROI) positions
             - ROI intensity derivatives
             - Amplitude (or None if fit failed)
             - Mean (or None if fit failed)
@@ -184,7 +130,7 @@ class GaussianFitter:
         # Fit the Gaussian
         try:
             popt, _ = curve_fit(
-                self.math_utils.gaussian,
+                self.gaussian,
                 positions_roi,
                 intensity_deriv_roi,
                 p0=[a_guess, x0_guess, sigma_guess]
@@ -203,9 +149,35 @@ class LaserProfileAnalyzer:
 
     def __init__(self):
         """Initialize analyzer with required components."""
-        self.data_loader = DataLoader()
-        self.math_utils = MathUtils()
+        self.file_manager = FileManager()
+        self.data_processor = DataProcessor()
+        self.plot_helper = PlotHelper()
         self.gaussian_fitter = GaussianFitter()
+
+    def calculate_intensity(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate intensity and its standard deviation from LDR readings.
+
+        Args:
+            df: DataFrame with ldr_mean and ldr_stddev columns
+
+        Returns:
+            DataFrame with position, intensity, and intensity_stddev
+        """
+        ldr_voltage = self.data_processor.adc_to_voltage(
+            df['ldr_mean'], CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION
+        )
+        ldr_voltage_stddev = self.data_processor.adc_to_voltage(
+            df['ldr_stddev'], CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION
+        )
+        intensity = 1 / ldr_voltage
+        intensity_stddev = ldr_voltage_stddev / (ldr_voltage ** 2)
+
+        return pd.DataFrame({
+            'position': df['position'],
+            'intensity': intensity,
+            'intensity_stddev': intensity_stddev
+        })
 
     def analyze_profile(self, csv_path: str) -> Dict[str, Any]:
         """
@@ -222,26 +194,23 @@ class LaserProfileAnalyzer:
         base_name = os.path.splitext(filename)[0]
 
         # Load and process data
-        df = self.data_loader.load_data(csv_path)
-        intensity_df = self.data_loader.calculate_intensity(df)
+        df = self.file_manager.load_csv_data(csv_path)
+        intensity_df = self.calculate_intensity(df)
 
         # Sort by position to ensure consistency
         sorted_df = intensity_df.sort_values('position')
         positions_deg = sorted_df['position'].values
-        positions_rad = self.math_utils.degrees_to_radians(positions_deg)
+        positions_rad = self.data_processor.degrees_to_radians(positions_deg)
         intensities = sorted_df['intensity'].values
         intensities_stddev = sorted_df['intensity_stddev'].values
 
-        # Calculate derivative and error propagation for derivative
+        # Calculate derivative of intensity
         intensity_derivative = np.gradient(intensities, positions_rad)
 
-        # Error propagation for numerical derivative
-        # For central differences, the error propagation is approximately:
-        # σ_derivative ≈ √2 * σ_intensity / Δx
-        # Using simplified approach by computing gradient of standard deviation
-        intensity_derivative_stddev = np.sqrt(
-            (np.gradient(intensities_stddev, positions_rad))**2 +
-            (intensities_stddev / (positions_rad[1] - positions_rad[0]))**2
+        # Use the new error propagation method for central differences
+        dx = positions_rad[1] - positions_rad[0]  # Assuming uniform spacing
+        intensity_derivative_stddev = ErrorPropagation.central_difference_error(
+            intensities, intensities_stddev, dx
         )
 
         # Fit Gaussian to derivative
@@ -281,7 +250,7 @@ class LaserProfileAnalyzer:
         if sigma is not None:
             # Generate x values for smooth curve
             x_fit = np.linspace(positions_rad.min(), positions_rad.max(), 1000)
-            y_fit = self.math_utils.gaussian(x_fit, amplitude, mean, sigma)
+            y_fit = self.gaussian_fitter.gaussian(x_fit, amplitude, mean, sigma)
 
             axes[1].plot(
                 x_fit,
@@ -314,7 +283,7 @@ class LaserProfileAnalyzer:
         # Save plot
         plt.tight_layout()
         out_path = os.path.join(CONFIG.OUT_DIR, f'{base_name}_analysis.png')
-        os.makedirs(os.path.dirname(out_path), exist_ok=True)  # Ensure output directory exists
+        self.file_manager.ensure_output_directory(os.path.dirname(out_path))
         plt.savefig(out_path)
         plt.close(fig)
 
@@ -397,7 +366,7 @@ class LaserProfileAnalyzer:
                     amplitude = y_ref / np.exp(-(x_ref - data['center_position'])**2 /
                                                (2 * data['sigma_gaussian']**2))
 
-                y_fit = self.math_utils.gaussian(
+                y_fit = self.gaussian_fitter.gaussian(
                     x_fit,
                     amplitude,
                     data['center_position'],
@@ -428,16 +397,17 @@ class LaserProfileAnalyzer:
 
         plt.tight_layout()
         out_path = os.path.join(CONFIG.OUT_DIR, 'combined_analysis.png')
-        os.makedirs(os.path.dirname(out_path), exist_ok=True)  # Ensure output directory exists
+        self.file_manager.ensure_output_directory(os.path.dirname(out_path))
         plt.savefig(out_path)
         print(f"\n✓ Combined comparison plot saved to {out_path}")
 
 
 def main() -> None:
     """Main entry point for the laser profile analysis program."""
-    # Ensure output directory exists
+    # Create file manager and ensure output directory exists
+    file_manager = FileManager()
     out_dir_abs = os.path.abspath(os.path.join(os.path.dirname(__file__), CONFIG.OUT_DIR))
-    os.makedirs(out_dir_abs, exist_ok=True)
+    file_manager.ensure_output_directory(out_dir_abs)
 
     # List all CSV files in DATA_DIR
     data_dir_abs = os.path.abspath(os.path.join(os.path.dirname(__file__), CONFIG.DATA_DIR))
