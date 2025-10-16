@@ -15,31 +15,33 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from error_propagation import propagate_error
+
+from utils import (
+    BaseConstants, BaseConfig, FileManager,
+    DataProcessor as BaseDataProcessor,
+    PlotHelper as BasePlotHelper,
+    ErrorPropagation
+)
 
 
 @dataclass
-class Constants:
-    """Constants used in Brewster angle analysis."""
-    V_SUPPLY: float = 5.0            # Supply voltage (V)
-    R_FIXED: float = 9955            # Fixed resistor value (ohms)
-    STEPPER_STEPS_PER_REV: int = 2048  # Steps per full revolution for stepper motor
-    ANALOG_RESOLUTION: int = 1023    # 10-bit ADC resolution
+class BrewsterConstants(BaseConstants):
+    """Constants specific to Brewster angle analysis."""
+    # Inherits common constants from BaseConstants
 
 
 @dataclass
-class Config:
-    """Configuration parameters for file paths and analysis settings."""
-    DATA_DIR: str = '../data/brewster/'
-    OUT_DIR: str = '../out/'
+class BrewsterConfig(BaseConfig):
+    """Configuration parameters for Brewster angle analysis."""
+    DATA_DIR: str = '../data/brewster/'  # Data directory specific to Brewster experiment
 
 
 # Global instances
-CONSTANTS = Constants()
-CONFIG = Config()
+CONSTANTS = BrewsterConstants()
+CONFIG = BrewsterConfig()
 
 
-class DataProcessor:
+class DataProcessor(BaseDataProcessor):
     """Handles data loading and processing for Brewster angle analysis."""
 
     @staticmethod
@@ -55,14 +57,16 @@ class DataProcessor:
             Tuple of (angles, ldr_voltage_feedback, ldr_resistance, intensities,
                      adc_stddev, resistance_uncertainty, intensity_uncertainty)
         """
-        # Load the data
-        data = pd.read_csv(data_file)
+        # Load the data using FileManager
+        file_manager = FileManager()
+        data = file_manager.load_csv_data(data_file)
 
-        # Extract angle and intensity
-        angles = 360 * data['step'] / CONSTANTS.STEPPER_STEPS_PER_REV  # Convert steps to degrees
+        # Convert steps to degrees using the base class method
+        angles = BaseDataProcessor.steps_to_degrees(data['step'], CONSTANTS.STEPPER_STEPS_PER_REV)
 
-        # Convert LDR voltage to light intensity
-        ldr_voltage_feedback = data['adc_mean'] * CONSTANTS.V_SUPPLY / CONSTANTS.ANALOG_RESOLUTION
+        # Convert ADC values to voltage using the base class method
+        ldr_voltage_feedback = BaseDataProcessor.adc_to_voltage(
+            data['adc_mean'], CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION)
 
         # Calculate LDR resistance from voltage divider
         ldr_resistance = CONSTANTS.R_FIXED * (CONSTANTS.V_SUPPLY - ldr_voltage_feedback) / ldr_voltage_feedback
@@ -73,28 +77,32 @@ class DataProcessor:
         # Extract adc_stddev
         adc_stddev = data['adc_stddev']
 
+        # Convert adc_stddev to voltage uncertainty using the base class method
+        voltage_stddev = BaseDataProcessor.adc_to_voltage(
+            adc_stddev, CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION)
+
         # Error propagation for resistance
         V = sp.Symbol('V')
         Rf = CONSTANTS.R_FIXED
         Vs = CONSTANTS.V_SUPPLY
         R_expr = Rf * (Vs - V) / V
         resistance_uncertainty = []
-        for v, dv in zip(ldr_voltage_feedback, adc_stddev * Vs / CONSTANTS.ANALOG_RESOLUTION):
-            resistance_uncertainty.append(propagate_error(R_expr, [V], {V: v}, {V: dv}))
+        for v, dv in zip(ldr_voltage_feedback, voltage_stddev):
+            resistance_uncertainty.append(ErrorPropagation.propagate_error(R_expr, [V], {V: v}, {V: dv}))
         resistance_uncertainty = pd.Series(resistance_uncertainty)
 
         # Error propagation for intensity
         intensity_expr = 1 / R_expr
         intensity_uncertainty = []
-        for v, dv in zip(ldr_voltage_feedback, adc_stddev * Vs / CONSTANTS.ANALOG_RESOLUTION):
-            intensity_uncertainty.append(propagate_error(intensity_expr, [V], {V: v}, {V: dv}))
+        for v, dv in zip(ldr_voltage_feedback, voltage_stddev):
+            intensity_uncertainty.append(ErrorPropagation.propagate_error(intensity_expr, [V], {V: v}, {V: dv}))
         intensity_uncertainty = pd.Series(intensity_uncertainty)
 
         return (
-            angles,
-            ldr_voltage_feedback,
-            ldr_resistance,
-            intensities,
+            pd.Series(angles),
+            pd.Series(ldr_voltage_feedback),
+            pd.Series(ldr_resistance),
+            pd.Series(intensities),
             adc_stddev,
             resistance_uncertainty,
             intensity_uncertainty
@@ -271,7 +279,7 @@ class BrewsterAngleDetector:
         return brewster_angles
 
 
-class PlotHelper:
+class PlotHelper(BasePlotHelper):
     """Helper methods for plotting and visualization of Brewster angle data."""
 
     @staticmethod
@@ -506,7 +514,7 @@ class BrewsterAnalyzer:
         adc_stddev: pd.Series,
         resistance_uncertainty: pd.Series,
         intensity_uncertainty: pd.Series,
-    ) -> None:
+    ) -> str:
         """
         Create visualization plots for Brewster angle analysis, with error bars.
 
@@ -520,13 +528,21 @@ class BrewsterAnalyzer:
             adc_stddev: Series of ADC standard deviations
             resistance_uncertainty: Series of resistance uncertainties
             intensity_uncertainty: Series of intensity uncertainties
+
+        Returns:
+            Path to the saved plot file
         """
-        fig = plt.figure(figsize=(12, 8))
+        # Create a figure using the base PlotHelper's method
+        fig, _ = BasePlotHelper.setup_basic_figure(figsize=(12, 8))
 
         # Determine the angle offset based on perpendicular regions
         angle_offset = 0
         if perpendicular_regions:
             angle_offset = perpendicular_regions[0][1]  # Middle angle of first region
+
+        # Convert ADC stddev to voltage uncertainty using DataProcessor utility
+        voltage_uncertainty = BaseDataProcessor.adc_to_voltage(
+            adc_stddev, CONSTANTS.V_SUPPLY, CONSTANTS.ANALOG_RESOLUTION)
 
         # Plot 1: Raw voltage (with error bars)
         voltage_ax = self.plot_helper.setup_subplot(
@@ -534,7 +550,7 @@ class BrewsterAnalyzer:
             ldr_voltage_feedback,
             'LDR Voltage vs Angle',
             'Voltage (V)',
-            'blue', yerr=adc_stddev * CONSTANTS.V_SUPPLY / CONSTANTS.ANALOG_RESOLUTION,
+            'blue', yerr=voltage_uncertainty,
             label='LDR Voltage'
         )
         self.plot_helper.relabel_x_axis(voltage_ax, angle_offset)
@@ -586,14 +602,18 @@ class BrewsterAnalyzer:
 
         plt.tight_layout()
 
-        # Ensure output directory exists
-        out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../out'))
-        os.makedirs(out_dir, exist_ok=True)
+        # Use FileManager to ensure output directory exists
+        file_manager = FileManager()
+        out_dir = file_manager.ensure_output_directory(CONFIG.OUT_DIR)
 
-        # Save plot to out directory
-        out_path = os.path.join(out_dir, 'brewster_plot.png')
-        plt.savefig(out_path)
+        # Save figure using the base PlotHelper method
+        out_filename = 'brewster_plot.png'
+        out_path = BasePlotHelper.save_figure(fig, out_filename, out_dir)
+
         plt.show()
+        plt.close(fig)
+
+        return out_path
 
     def analyze_brewster_data(self, data_file: str) -> Tuple[pd.Series, pd.Series, List[Tuple], List[Tuple]]:
         """
@@ -736,12 +756,14 @@ def main() -> None:
     """
     Main function to process and analyze all Brewster angle data files.
     """
-    # Initialize the analyzer
+    # Initialize the analyzer and file manager
     analyzer = BrewsterAnalyzer()
+    file_manager = FileManager()
 
-    # Get the absolute data directory path
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), CONFIG.DATA_DIR))
+    # Get the absolute data directory path using FileManager
+    data_dir = file_manager.get_data_directory(__file__, CONFIG.DATA_DIR)
 
+    # Process each CSV file in the data directory
     for file in os.listdir(data_dir):
         if not file.endswith('.csv'):  # Only process CSV files
             continue
