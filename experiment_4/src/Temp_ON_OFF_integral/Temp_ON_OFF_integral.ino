@@ -3,24 +3,33 @@
 // - Michel Godin
 //***********************************
 
+#include "CSVPrinter.h"
+
+/**
+ * @brief Holds the mean and standard deviation of thermistor readings.
+ */
+struct Stats {
+    float mean;
+    float stddev;
+};
+
 //*** Constants 
-const float Tset = 65.0;    // set temperature in degrees celcius (ideally between 40 and 65)
-const float Band = 3.0;     // Temperature band for hysteresis: not used yet!
+const float Tset = 55.0;    // set temperature in degrees celcius (ideally between 40 and 65)
+const float Band = 1.0;     // Temperature band for hysteresis
 const float Tmax = 75.0;    // Setting a maximum temperature. For safety, heater will be turned off when exceeding this temperature.
 const int numSamples = 100; // number of samples to average for temperature measurement
 const int gatePin = 9; // PWM pin to control MOSFET
+const int thermistorPin = A0; // Analog pin connected to the thermistor
 const long R_series = 100000; // series resistance for thermistor's voltage divider
 
 //*** Variable definitions    
 float temp_average; // average measured temperature
-float temp_relative; // relative temperature with respect to Tset
 float Vo; // ADC voltage (digital) measured across thermistor
 float Rt, lnRt; // thermistor resistance, natural log of thermistor resistance
 float T_kelvin, T_celsius; // temperature (Kelvin), temperature (degrees Celsius)
 
 //*** Variable declarations
-float temp_sum = 0.0; // sum of measured temperatures
-float temp_squared_sum = 0.0; // sum of squared measured temperatures
+Stats temp_stats; // struct to hold temperature statistics
 float A = 0.7141095422e-3, B = 2.143243110e-4, C = 1.129790692e-7; // Steinhart-Hart coefficients
 
 //*** Time associated variable definitions and declarations
@@ -31,8 +40,9 @@ unsigned long MaxTime = 30;    // Time limit: Maximum duration of experiment in 
 
 //*** Some variables that are not used now, but might become useful when you implement PID control
 float Error;        // The error (Tset - temp_average)
+float Offset = 0.165; // offset for proportional control
 float Previous_Error = 0.0; // necessary for the PID controller when calculating the integral and derivative
-float Kp = 0.3; // proportional gain - you can    
+float Kp = 0.3; // proportional gain - you can tune this value
 float Ki = 0.00001; // integral gain, can be zero 
 float Kd = 0.0; // derivative gain, can be zero
 float Integral = 0.0; // Integral value: sum of the areas
@@ -40,40 +50,24 @@ float Derivative = 0.0; // Derivative value: slope
 int Power;        // When implementing PID, Power will be calcuated and this value will be the PWM output between 0-255)
                             // Power = (Kp*Error + Ki*Integral + Kd*Derivative) * 255;
 
-/**
- * @brief Holds the mean and standard deviation of thermistor readings.
- */
-struct TempStats {
-    float mean;
-    float stddev;
-};
-
 void setup() {
-    
-    pinMode(gatePin, OUTPUT);     
-    Serial.begin(9600);
+    pinMode(gatePin, OUTPUT);
+    CSVPrinter::begin(9600);
     Serial.println("ON-OFF Control");
-    Serial.println("Elapsed_time_(sec),Measured_temperature_(C),Relative_temperature_(C),Output_power");    
+    CSVPrinter::printHeader("time(s),temp_mean(C),temp_stddev(C),output_power");
 }
 
 void loop() {
     // This main loop is implementing ON-OFF temperature control.
     get_time();                         // This custom function is defined below. It determines the current time elapsed since the beginning. Current time is store in the variable "CurrentTime"
-    measureTemperature();     // This custom function is defined below. It measures the temperature and stores the average in the variable "temp_average"
+    temp_stats = measureTemperature(thermistorPin, numSamples);     // This custom function is defined below. It measures the temperature and stores the average in the variable "temp_average"
 
-//*** This IF statement is the actual ON-OFF control
-    if(temp_relative <= - Band / 2.0) {
-            Power = 255;
-            analogWrite(gatePin, Power);        // If measured temperature is LOWER than setpoint, the heater is turned ON
-    }
-    else if(temp_relative >= Band / 2.0) {
-        Power = 0;
-        analogWrite(gatePin, Power);        // If measured temperature is HIGHER than setpoint, the heater is turned OFF
-    }
+    // ON-OFF control logic
+    writePID(Power, Tset, temp_stats, Offset, Kp); // Using proportional control for ON-OFF
+    analogWrite(gatePin, Power); // setting the output power to the heater
 
-    Serial.println(String(CurrentTime/1000.0) + "," + String(temp_average) + "," + String(temp_relative) + "," + String(Power));    //sending time and temperature to the serial monitor
-    delay(50);
-    
+    CSVPrinter::printRow(CurrentTime/1000.0, temp_stats.mean, temp_stats.stddev, Power, 3);    //sending time and temperature to the serial monitor
+    delay(10);
 }
 
 
@@ -81,20 +75,26 @@ void loop() {
 // We use function to make the main LOOP() a little tidier
 
 //* This function computes the average temperature for better results
-void measureTemperature(){
-    for(int m=1;m<=numSamples;m++){
-        Vo = analogRead(A0); // read analog to digital converter value
-        Rt = R_series * (Vo / (1023 - Vo)); 
-        lnRt = log(Rt);
-        T_kelvin = (1.0 / (A + B*lnRt + C*pow(lnRt, 3)));
-        T_celsius = T_kelvin - 273.15; 
-        temp_sum += T_celsius;
-        delay(10); // small delay to allow ADC to stabilize
-    }
-    temp_average = temp_sum/numSamples;
-    temp_relative = temp_average - Tset;
-    temp_sum = 0.0;
+Stats measureTemperature(int pin, int numSamples) {
+    float temp_sum = 0.0;
+    float temp_squared_sum = 0.0;
+    float Vo, Rt, lnRt, T_kelvin, T_celsius;
+    Stats stats;
 
+    for (int m = 0; m < numSamples; m++) {
+        Vo = analogRead(pin);
+        Rt = R_series * (Vo / (1023.0 - Vo));
+        lnRt = log(Rt);
+        T_kelvin = (1.0 / (A + B * lnRt + C * pow(lnRt, 3)));
+        T_celsius = T_kelvin - 273.15;
+        temp_sum += T_celsius;
+        temp_squared_sum += T_celsius * T_celsius;
+        delay(10);
+    }
+    stats.mean = temp_sum / numSamples;
+    float variance = (temp_squared_sum - numSamples * stats.mean * stats.mean) / (numSamples - 1);
+    stats.stddev = variance > 0 ? sqrt(variance) : 0;
+    return stats;
 
 // For safety: The following turns off the heater if the temperature exceed the pre-defined MAX temperature
     // if(temp_average >= Tmax){
@@ -106,6 +106,13 @@ void measureTemperature(){
     // }    
 }
 
+void writePID(float power, float Tset, Stats temp_stats, float offset, float Kp){
+    float error = (Tset - temp_stats.mean) / Band;
+    float integral = Previous_Error + error * (DeltaTime / 1000.0); // integral term
+    Previous_Error = error; // update previous error
+    int out = (offset + error * Kp + integral * Ki) * 255;
+    Power = constrain(out, 0, 255);
+}
 
 //* This function keeps track of the time.
 void get_time(){
