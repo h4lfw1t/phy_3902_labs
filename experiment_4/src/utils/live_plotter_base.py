@@ -1,22 +1,54 @@
+import time
+from abc import ABC, abstractmethod
+from typing import Optional
+
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import pandas as pd
 import serial
 import serial.tools.list_ports
 from matplotlib import figure
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
-import pandas as pd
-from collections import deque
-import time
-from abc import ABC, abstractmethod
-from typing import Union, Optional
+
 
 class LivePlotter(ABC):
-    def __init__(self, serial_port='COM5', baud_rate=9600, max_points=2048):
+    """
+    Base class for live plotting data from a serial port.
+    Subclasses must implement methods for setting up the plot, processing
+    data, and updating the plot.
+
+    Attributes:
+        serial_port (: The serial port to connect to (e.g., 'COM5').
+        baud_rate: The baud rate for the serial connection.
+        max_points: Maximum number of data points to retain for plotting.
+        ser: The serial connection object.
+        header_read: Flag indicating if the header has been read.
+        awaiting_header: Flag indicating if waiting for header start.
+        data: List to store incoming data points.
+        fig: Matplotlib figure object.
+        axes: Matplotlib axes object(s).
+        lines: List of line objects for updating the plot.
+    """
+
+    def __init__(
+        self,
+        serial_port: str = "COM5",
+        baud_rate: int = 9600,
+        max_points: int = 2048,
+    ):
+        """
+        Initialize the LivePlotter.
+
+        Args:
+            serial_port: The serial port to connect to (e.g., 'COM5').
+            baud_rate: The baud rate for the serial connection.
+            max_points: Maximum number of data points to retain for plotting.
+        """
         self.serial_port = serial_port
         self.baud_rate = baud_rate
         self.max_points = max_points
         self.ser = None
         self.header_read = False
+        self.awaiting_header = True
         self.data = []  # List of dicts or tuples, as needed
         self.fig: Optional[figure.Figure] = None
         self.axes = None
@@ -25,12 +57,17 @@ class LivePlotter(ABC):
 
     @abstractmethod
     def setup_plot(self):
-        """Setup matplotlib figure, axes, and lines. Must be implemented by subclass."""
+        """
+        Setup matplotlib figure, axes, and lines. Must be implemented by
+        subclass.
+        """
         pass
 
     @abstractmethod
     def process_data(self, raw_line):
-        """Process a line of raw serial data. Must be implemented by subclass."""
+        """
+        Process a line of raw serial data. Must be implemented by subclass.
+        """
         pass
 
     @abstractmethod
@@ -40,7 +77,9 @@ class LivePlotter(ABC):
 
     def connect_serial(self):
         try:
-            self.ser = serial.Serial(self.serial_port, self.baud_rate, timeout=1)
+            self.ser = serial.Serial(
+                self.serial_port, self.baud_rate, timeout=1
+            )
             print(f"Connected to {self.serial_port} at {self.baud_rate} baud")
             time.sleep(2)
             return True
@@ -49,6 +88,7 @@ class LivePlotter(ABC):
             self.list_available_ports()
             return False
 
+    @staticmethod
     def list_available_ports(self):
         ports = serial.tools.list_ports.comports()
         if ports:
@@ -61,7 +101,10 @@ class LivePlotter(ABC):
         ports = serial.tools.list_ports.comports()
         arduino_ports = []
         for port in ports:
-            if any(keyword in port.description.lower() for keyword in ['arduino', 'ch340', 'cp210', 'ftdi']):
+            if any(
+                keyword in port.description.lower()
+                for keyword in ["arduino", "ch340", "cp210", "ftdi"]
+            ):
                 arduino_ports.append(port.device)
         if arduino_ports:
             print(f"Found potential Arduino ports: {arduino_ports}")
@@ -73,13 +116,25 @@ class LivePlotter(ABC):
         return False
 
     def read_serial_data(self):
+        """
+        Read and parse data from the serial port.
+        Incoming data is expected to be in csv format, preceded by an
+        indicator line '---DATA START---' and a header line.
+        """
         if self.ser and self.ser.in_waiting > 0:
             try:
-                line = self.ser.readline().decode('utf-8').strip()
+                line = self.ser.readline().decode("utf-8").strip()
                 if not self.header_read:
-                    if line.startswith('step'):
+                    if self.awaiting_header:
+                        self.header_read = True
+                        self.awaiting_header = False
                         self.header_read = True
                         print("Header detected, starting data collection...")
+                        return False
+                    if line.startswith("---DATA START---"):
+                        self.awaiting_header = True
+                        print("Data start marker detected, awaiting header...")
+                        return False
                     return False
                 if line:
                     self.process_data(line)
@@ -89,9 +144,11 @@ class LivePlotter(ABC):
         return False
 
     def save_data(self, filename=None):
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
         if not filename:
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
             filename = f"live_plot_{timestamp}.csv"
+        else:
+            filename = f"{filename}_{timestamp}.csv"
         if self.data:
             df = pd.DataFrame(self.data)
             df.to_csv(filename, index=False)
@@ -108,14 +165,18 @@ class LivePlotter(ABC):
             print("\nTrying auto-detection...")
             connected = self.try_auto_connect()
         if not connected:
-            print("Failed to connect to any serial port. Please check the connection and try again.")
+            print(
+                "Failed to connect to any serial port. Please check the connection and try again."
+            )
             return
         print("Starting live plot. Press Ctrl+C to stop and save data.")
         try:
             if self.fig is None:
                 print("Figure not set up properly.")
                 return
-            ani = animation.FuncAnimation(self.fig, self.update, interval=100, blit=False)
+            ani = animation.FuncAnimation(
+                self.fig, self.update, interval=100, blit=False
+            )
             plt.show()
         except KeyboardInterrupt:
             print("\nStopping live plot...")
