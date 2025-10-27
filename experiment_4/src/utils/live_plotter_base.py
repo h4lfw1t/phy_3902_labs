@@ -1,3 +1,4 @@
+import os
 import time
 from abc import ABC, abstractmethod
 from typing import Optional
@@ -143,16 +144,22 @@ class LivePlotter(ABC):
                 print(f"Error parsing serial data: {e}")
         return False
 
-    def save_data(self, filename=None):
+    def save_data(self, filename=None, out_dir=None):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
+        if out_dir is None:
+            out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
+        else:
+            out_dir = os.path.abspath(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
         if not filename:
             filename = f"live_plot_{timestamp}.csv"
         else:
             filename = f"{filename}_{timestamp}.csv"
+        out_path = os.path.join(out_dir, filename)
         if self.data:
             df = pd.DataFrame(self.data)
-            df.to_csv(filename, index=False)
-            print(f"Data saved to {filename}")
+            df.to_csv(out_path, index=False)
+            print(f"Data saved to {out_path}")
 
     def update(self, frame):
         self.read_serial_data()

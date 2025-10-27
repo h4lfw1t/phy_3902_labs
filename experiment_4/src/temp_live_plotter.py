@@ -62,10 +62,15 @@ class TempLivePlotter(LivePlotter):
             parts = [x.strip() for x in raw_line.split(",")]
             if len(parts) != 4:
                 return
-            time_val = float(parts[0])
-            temp_mean = float(parts[1])
-            temp_std = float(parts[2])
-            output_power = float(parts[3])
+            # Skip header or non-numeric lines
+            try:
+                time_val = float(parts[0])
+                temp_mean = float(parts[1])
+                temp_std = float(parts[2])
+                output_power = float(parts[3])
+            except ValueError:
+                # Likely a header line, skip
+                return
             self.data.append(
                 {
                     "time(s)": time_val,
@@ -104,10 +109,13 @@ class TempLivePlotter(LivePlotter):
             elinewidth=1,
             capsize=2,
         )
-        # Update band lines if needed
-        self.target_line.set_ydata([55.0, 55.0])
-        self.upper_band.set_ydata([56.5, 56.5])
-        self.lower_band.set_ydata([53.5, 53.5])
+        # Update band lines if they exist
+        if self.target_line is not None:
+            self.target_line.set_ydata([55.0, 55.0])
+        if self.upper_band is not None:
+            self.upper_band.set_ydata([56.5, 56.5])
+        if self.lower_band is not None:
+            self.lower_band.set_ydata([53.5, 53.5])
 
 
 if __name__ == "__main__":
