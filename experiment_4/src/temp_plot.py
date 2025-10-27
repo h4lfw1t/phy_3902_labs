@@ -79,6 +79,11 @@ def plot_temperature_data(
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
+    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../out"))
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, file_name.replace(".csv", ".png"))
+    plt.savefig(out_path)
+    print(f"Plot saved to {out_path}")
     plt.show()
 
 
@@ -88,4 +93,5 @@ if __name__ == "__main__":
     # plot_temperature_data('proportional_0.1_offset.csv')
     # plot_temperature_data('proportional_0.165_offset.csv')
     # plot_temperature_data('proportional_0.165_offset_1_band.csv', band=1.0)
-    plot_temperature_data("integral_0.165_offset_1_band.csv", band=1.0)
+    # plot_temperature_data("integral_0.165_offset_1_band.csv", band=1.0)
+    plot_temperature_data("live_plot_20251027_164240.csv", band=1.0)
