@@ -21,6 +21,8 @@ const int numSamples = 100; // number of samples to average for temperature meas
 const int gatePin = 9; // PWM pin to control MOSFET
 const int thermistorPin = A0; // Analog pin connected to the thermistor
 const long R_series = 100000; // series resistance for thermistor's voltage divider
+const unsigned long RESPONSE_TIME_S = 60;
+const unsigned long ActionTime = (unsigned long)(2 * RESPONSE_TIME_S * 1000); // ActionTime is twice the response time, in ms
 
 //*** Variable definitions    
 float temp_average; // average measured temperature
@@ -37,6 +39,9 @@ unsigned long CurrentTime;            // ms
 unsigned long PreviousTime = 0; // ms
 unsigned long DeltaTime;                // ms
 unsigned long MaxTime = 30;    // Time limit: Maximum duration of experiment in minutes until the heater is turned OFF.
+unsigned long LastIntegralUpdate = 0; // Last time the integral was updated
+unsigned long windowStartTime = 0;
+
 
 //*** Some variables that are not used now, but might become useful when you implement PID control
 float Error;        // The error (Tset - temp_average)
@@ -44,9 +49,7 @@ float Offset = 0.165; // offset for proportional control
 float Previous_Error = 0.0; // necessary for the PID controller when calculating the integral and derivative
 float Kp = 0.3; // proportional gain - you can tune this value
 float Ki = 0.00001; // integral gain, can be zero 
-float Kd = 0.0; // derivative gain, can be zero
 float Integral = 0.0; // Integral value: sum of the areas
-float Derivative = 0.0; // Derivative value: slope
 int Power;        // When implementing PID, Power will be calcuated and this value will be the PWM output between 0-255)
                             // Power = (Kp*Error + Ki*Integral + Kd*Derivative) * 255;
 
@@ -54,19 +57,30 @@ void setup() {
     pinMode(gatePin, OUTPUT);
     CSVPrinter::begin(9600);
     Serial.println("ON-OFF Control");
+    Serial.println("---DATA START---");
     CSVPrinter::printHeader("time(s),temp_mean(C),temp_stddev(C),output_power");
 }
 
 void loop() {
-    // This main loop is implementing ON-OFF temperature control.
-    get_time();                         // This custom function is defined below. It determines the current time elapsed since the beginning. Current time is store in the variable "CurrentTime"
-    temp_stats = measureTemperature(thermistorPin, numSamples);     // This custom function is defined below. It measures the temperature and stores the average in the variable "temp_average"
+    get_time();
+    temp_stats = measureTemperature(thermistorPin, numSamples);
 
-    // ON-OFF control logic
-    writePID(Power, Tset, temp_stats, Offset, Kp); // Using proportional control for ON-OFF
-    analogWrite(gatePin, Power); // setting the output power to the heater
+    Error = (Tset - temp_stats.mean) / Band;
 
-    CSVPrinter::printRow(CurrentTime/1000.0, temp_stats.mean, temp_stats.stddev, Power, 3);    //sending time and temperature to the serial monitor
+    // Reset Integral at the start of each ActionTime window
+    if (CurrentTime - windowStartTime >= ActionTime) {
+        Integral = 0.0;
+        windowStartTime = CurrentTime;
+    }
+
+    // Accumulate error * dt within the window
+    float dt = DeltaTime / 1000.0; // seconds
+    Integral += Error * dt;
+
+    integrate(Power, Tset, temp_stats, Offset, Kp);
+    analogWrite(gatePin, Power);
+
+    CSVPrinter::printRow(CurrentTime/1000.0, temp_stats.mean, temp_stats.stddev, Power, 3);
     delay(10);
 }
 
@@ -93,7 +107,7 @@ Stats measureTemperature(int pin, int numSamples) {
     }
     stats.mean = temp_sum / numSamples;
     float variance = (temp_squared_sum - numSamples * stats.mean * stats.mean) / (numSamples - 1);
-    stats.stddev = variance > 0 ? sqrt(variance) : 0;
+    stats.stddev = sqrt(abs(variance));
     return stats;
 
 // For safety: The following turns off the heater if the temperature exceed the pre-defined MAX temperature
@@ -106,11 +120,9 @@ Stats measureTemperature(int pin, int numSamples) {
     // }    
 }
 
-void writePID(float power, float Tset, Stats temp_stats, float offset, float Kp){
-    float error = (Tset - temp_stats.mean) / Band;
-    float integral = Previous_Error + error * (DeltaTime / 1000.0); // integral term
-    Previous_Error = error; // update previous error
-    int out = (offset + error * Kp + integral * Ki) * 255;
+void integrate(float power, float Tset, Stats temp_stats, float offset, float Kp){
+    Previous_Error = Error; // update previous error
+    int out = (offset + Error * Kp + Integral * Ki) * 255;
     Power = constrain(out, 0, 255);
 }
 
