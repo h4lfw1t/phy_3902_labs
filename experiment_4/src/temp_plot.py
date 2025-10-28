@@ -41,9 +41,10 @@ def check_data_file(file_path: str, required_cols) -> Optional[pd.DataFrame]:
     return data
 
 
-def plot_temperature_data(file_name: str, band: Optional[float] = None):
-    # Set default band if not provided
+def plot_temperature_data(file_name: str, band: Optional[float] = None, tset: Optional[float] = None):
+    # Set default band and tset if not provided
     band = band if band is not None else CONSTANTS.BAND
+    tset = tset if tset is not None else CONSTANTS.TSET
 
     # Retrieve and validate data
     file_path = get_data_path(file_name, CONFIG)
@@ -70,23 +71,23 @@ def plot_temperature_data(file_name: str, band: Optional[float] = None):
     plt.ylabel("Temperature (°C)")
     # Add target and band lines
     plt.axhline(
-        y=CONSTANTS.TSET,
+        y=tset,
         color="yellow",
         linestyle="--",
-        label=f"Target Temperature ({CONSTANTS.TSET}°C)",
+        label=f"Target Temperature ({tset}°C)",
     )
     if band:
         plt.axhline(
-            y=CONSTANTS.TSET + band / 2,
+            y=tset + band / 2,
             color="pink",
             linestyle="--",
-            label=f"Upper Band ({CONSTANTS.TSET + band / 2}°C)",
+            label=f"Upper Band ({tset + band / 2}°C)",
         )
         plt.axhline(
-            y=CONSTANTS.TSET - band / 2,
+            y=tset - band / 2,
             color="cyan",
             linestyle="--",
-            label=f"Lower Band ({CONSTANTS.TSET - band / 2}°C)",
+            label=f"Lower Band ({tset - band / 2}°C)",
         )
     # Add max, min, final value lines
     temp_vals = data["temp_mean(C)"]
@@ -133,10 +134,13 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         fname = sys.argv[1]
         band = float(sys.argv[2]) if len(sys.argv) > 2 else None
+        tset = float(sys.argv[3]) if len(sys.argv) > 3 else None
     else:
         # Prompt for file name if not provided
         fname = input("File name: ")
         band_input = input("Band (optional, press Enter to skip): ")
+        tset_input = input("Tset (optional, press Enter to skip): ")
         band = float(band_input) if band_input else None
+        tset = float(tset_input) if tset_input else None
 
-    plot_temperature_data(fname, band)
+    plot_temperature_data(fname, band, tset)

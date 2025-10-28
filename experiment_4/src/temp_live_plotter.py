@@ -1,6 +1,6 @@
+import sys
 import matplotlib.pyplot as plt
 from utils.live_plotter_base import LivePlotter
-
 
 class TempLivePlotter(LivePlotter):
     """
@@ -20,8 +20,12 @@ class TempLivePlotter(LivePlotter):
         serial_port: str = "COM5",
         baud_rate: int = 9600,
         max_points: int = 2048,
+        tset: float = 55.0,
+        band: float = 3.0,
     ):
         super().__init__(serial_port, baud_rate, max_points)
+        self.tset = tset
+        self.band = band
         self.target_line = None
         self.upper_band = None
         self.lower_band = None
@@ -37,17 +41,25 @@ class TempLivePlotter(LivePlotter):
         )
         self.lines.append(line)
         # Target and band lines
+        tset = self.tset
+        band = self.band
         self.target_line = self.axes.axhline(
-            y=55.0,
+            y=tset,
             color="yellow",
             linestyle="--",
-            label="Target Temperature (55°C)",
+            label=f"Target Temperature ({tset}°C)",
         )
         self.upper_band = self.axes.axhline(
-            y=56.5, color="pink", linestyle="--", label="Upper Band (56.5°C)"
+            y=tset + band / 2,
+            color="pink",
+            linestyle="--",
+            label=f"Upper Band ({tset + band / 2}°C)"
         )
         self.lower_band = self.axes.axhline(
-            y=53.5, color="cyan", linestyle="--", label="Lower Band (53.5°C)"
+            y=tset - band / 2,
+            color="cyan",
+            linestyle="--",
+            label=f"Lower Band ({tset - band / 2}°C)"
         )
         self.axes.set_title("Temperature vs Time (Live)")
         self.axes.set_xlabel("Time (s)")
@@ -110,16 +122,38 @@ class TempLivePlotter(LivePlotter):
             capsize=2,
         )
         # Update band lines if they exist
+        tset = self.tset
+        band = self.band
         if self.target_line is not None:
-            self.target_line.set_ydata([55.0, 55.0])
+            self.target_line.set_ydata([tset, tset])
         if self.upper_band is not None:
-            self.upper_band.set_ydata([56.5, 56.5])
+            self.upper_band.set_ydata([tset + band / 2, tset + band / 2])
         if self.lower_band is not None:
-            self.lower_band.set_ydata([53.5, 53.5])
+            self.lower_band.set_ydata([tset - band / 2, tset - band / 2])
 
 
 if __name__ == "__main__":
+    # Usage: python temp_live_plotter.py [serial_port] [baud_rate] [max_points] [tset] [band]
+    serial_port = "COM5"
+    baud_rate = 9600
+    max_points = 2048
+    tset = 55.0
+    band = 3.0
+    if len(sys.argv) > 1:
+        serial_port = sys.argv[1]
+    if len(sys.argv) > 2:
+        baud_rate = int(sys.argv[2])
+    if len(sys.argv) > 3:
+        max_points = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        tset = float(sys.argv[4])
+    if len(sys.argv) > 5:
+        band = float(sys.argv[5])
     plotter = TempLivePlotter(
-        serial_port="COM5", baud_rate=9600, max_points=2048
+        serial_port=serial_port,
+        baud_rate=baud_rate,
+        max_points=max_points,
+        tset=tset,
+        band=band,
     )
     plotter.start_live_plot()

@@ -49,7 +49,7 @@ float Offset = 0.165; // offset for proportional control
 float Previous_Error = 0.0; // necessary for the PID controller when calculating the integral and derivative
 float Kp = 0.3; // proportional gain - you can tune this value
 float Ki = 0.00001; // integral gain, can be zero 
-float Kd = 0.0; // derivative gain, can be zero
+float Kd = 0.00001; // derivative gain, can be zero
 float Integral = 0.0; // Integral value: sum of the areas
 float Derivative = 0.0; // Derivative value: slope
 int Power;      // When implementing PID, Power will be calcuated and this value will be the PWM output between 0-255)
@@ -57,7 +57,7 @@ int Power;      // When implementing PID, Power will be calcuated and this value
 
 // Derivative smoothing parameters
 const int DERIV_WINDOW = 10; // Number of samples for rolling average
-float tempBuffer[DERIV_WINDOW];
+float errorBuffer[DERIV_WINDOW];
 unsigned long timeBuffer[DERIV_WINDOW];
 int bufferIndex = 0;
 bool bufferFilled = false;
@@ -70,7 +70,7 @@ void setup() {
     CSVPrinter::printHeader("time(s),temp_mean(C),temp_stddev(C),output_power");
     // Initialize buffers
     for (int i = 0; i < DERIV_WINDOW; i++) {
-        tempBuffer[i] = 0.0;
+        errorBuffer[i] = 0.0;
         timeBuffer[i] = 0;
     }
 }
@@ -91,8 +91,8 @@ void loop() {
     float dt = DeltaTime / 1000.0; // seconds
     Integral += Error * dt;
 
-    // --- Derivative calculation with rolling average ---
-    tempBuffer[bufferIndex] = temp_stats.mean;
+    // --- Derivative calculation with rolling average (of error) ---
+    errorBuffer[bufferIndex] = Error;
     timeBuffer[bufferIndex] = CurrentTime;
     int oldestIndex = (bufferIndex + 1) % DERIV_WINDOW;
     bufferIndex = (bufferIndex + 1) % DERIV_WINDOW;
@@ -100,10 +100,10 @@ void loop() {
 
     float Derivative = 0.0;
     if (bufferFilled) {
-        float tempDiff = tempBuffer[bufferIndex] - tempBuffer[oldestIndex];
+        float errorDiff = errorBuffer[bufferIndex] - errorBuffer[oldestIndex];
         float timeDiff = (timeBuffer[bufferIndex] - timeBuffer[oldestIndex]) / 1000.0; // seconds
         if (timeDiff > 0) {
-            Derivative = -tempDiff / timeDiff; // Negative sign: positive derivative means temp rising, so error is decreasing
+            Derivative = errorDiff / timeDiff;
         }
     }
 
