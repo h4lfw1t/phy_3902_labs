@@ -80,5 +80,16 @@
         "Ki": 0.00001,
         "Kd": 0.0,
         "notes": ""
+    },
+    {
+        "filename": "live_plot_20251028_162354.csv",
+        "Tset": 55,
+        "band": 1,
+        "control_type": "PID",
+        "Offset": 0.165,
+        "Kp": 0.3,
+        "Ki": 0.00001,
+        "Kd": 0.00001,
+        "notes": ""
     }
 ]
