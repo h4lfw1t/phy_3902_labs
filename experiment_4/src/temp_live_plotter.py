@@ -31,6 +31,7 @@ class TempLivePlotter(LivePlotter):
         self.lower_band = None
         self.temp_errs = []
         self.errbar = None
+        self.setup_plot()
 
     def setup_plot(self):
         self.fig, self.axes = plt.subplots(figsize=(10, 5))
@@ -134,7 +135,7 @@ class TempLivePlotter(LivePlotter):
 
 if __name__ == "__main__":
     # Usage: python temp_live_plotter.py [serial_port] [baud_rate] [max_points] [tset] [band]
-    serial_port = "COM5"
+    serial_port = "COM4"
     baud_rate = 9600
     max_points = 2048
     tset = 55.0

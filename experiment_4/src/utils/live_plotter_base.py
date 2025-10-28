@@ -54,7 +54,6 @@ class LivePlotter(ABC):
         self.fig: Optional[figure.Figure] = None
         self.axes = None
         self.lines = []
-        self.setup_plot()
 
     @abstractmethod
     def setup_plot(self):
@@ -90,7 +89,7 @@ class LivePlotter(ABC):
             return False
 
     @staticmethod
-    def list_available_ports(self):
+    def list_available_ports():
         ports = serial.tools.list_ports.comports()
         if ports:
             for port in ports:
