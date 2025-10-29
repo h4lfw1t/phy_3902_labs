@@ -14,7 +14,7 @@ struct Stats {
 };
 
 //*** Constants 
-const float Tset = 55.0;    // set temperature in degrees celcius (ideally between 40 and 65)
+const float Tset = 65.0;    // set temperature in degrees celcius (ideally between 40 and 65)
 const float Band = 1.0;     // Temperature band for hysteresis
 const float Tmax = 75.0;    // Setting a maximum temperature. For safety, heater will be turned off when exceeding this temperature.
 const int numSamples = 100; // number of samples to average for temperature measurement
@@ -45,11 +45,11 @@ unsigned long windowStartTime = 0;
 
 //*** Some variables that are not used now, but might become useful when you implement PID control
 float Error;        // The error (Tset - temp_average)
-float Offset = 0.165; // offset for proportional control
+float Offset = 0.25; // offset for proportional control
 float Previous_Error = 0.0; // necessary for the PID controller when calculating the integral and derivative
 float Kp = 0.3; // proportional gain - you can tune this value
-float Ki = 0.00001; // integral gain, can be zero 
-float Kd = 0.00001; // derivative gain, can be zero
+float Ki = 0.001; // integral gain, can be zero 
+float Kd = 0.001; // derivative gain, can be zero
 float Integral = 0.0; // Integral value: sum of the areas
 float Derivative = 0.0; // Derivative value: slope
 int Power;      // When implementing PID, Power will be calcuated and this value will be the PWM output between 0-255)
@@ -103,7 +103,7 @@ void loop() {
         float errorDiff = errorBuffer[bufferIndex] - errorBuffer[oldestIndex];
         float timeDiff = (timeBuffer[bufferIndex] - timeBuffer[oldestIndex]) / 1000.0; // seconds
         if (timeDiff > 0) {
-            Derivative = errorDiff / timeDiff;
+            Derivative = -errorDiff / timeDiff;
         }
     }
 
