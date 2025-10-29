@@ -1,7 +1,7 @@
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import linregress
 
 # Constants (from Arduino code)
 m_block = 24.63  # grams
@@ -11,63 +11,52 @@ dR_heater = 0.1
 
 # Load data
 data = pd.read_csv(r'../data/specific_heat_capacity_data.csv')
-
-# Find regions of constant heating/cooling by looking for changes in power
 power = data['power(W)'].to_numpy(dtype=float)
 time = data['time(s)'].to_numpy(dtype=float)
 temp = data['temp_mean(C)'].to_numpy(dtype=float)
 
-# Identify indices where power switches between ~0 and >0 (heating/cooling transitions)
-transitions = np.where(np.abs(np.diff(power)) > 0.1)[0] + 1
-regions = []
-start = 0
-for idx in transitions:
-	regions.append((start, idx))
-	start = idx
-regions.append((start, len(data)))
 
-# For each region, if power is nonzero (heating), fit dT/dt and calculate c
-results = []
-for i, (start, end) in enumerate(regions):
-	region_power = float(np.mean(power[start:end]))
-	if region_power < 0.1:
-		continue  # skip cooling/zero-power
-	t = np.array(time[start:end], dtype=float)
-	T = np.array(temp[start:end], dtype=float)
-	# Linear fit to T vs t
-	slope, intercept, r, p, stderr = linregress(t, T)
-	dTdt = slope
-	# c = P / (m * dT/dt)
-	# If dTdt is a tuple, extract the first element
-	if isinstance(dTdt, tuple):
-		dTdt_val = dTdt[0]
-	else:
-		dTdt_val = dTdt
-	# Try to convert to float robustly
-	dTdt_val = float(np.asarray(dTdt_val).flatten()[0])
-	c = region_power / (float(m_block) * dTdt_val)
-	results.append({
-		'region': i+1,
-		'start_time': float(t[0]),
-		'end_time': float(t[-1]),
-		'mean_power': region_power,
-		'dTdt': dTdt,
-		'c': c
-	})
+def get_Tset():
+	try:
+		Tset = float(input("Enter Tset (deg C): "))
+	except Exception:
+		print("Invalid input. Using default Tset=30.0")
+		Tset = 30.0
+	return Tset
 
-# Print results
-for res in results:
-	print(f"Region {res['region']}: t={res['start_time']:.1f}-{res['end_time']:.1f} s, "
-		  f"P={res['mean_power']:.3f} W, dT/dt={res['dTdt']:.5f} C/s, c={res['c']*1000:.1f} J/kg/K")
+if __name__ == "__main__":
+	Tset = get_Tset()
+	Tset_plus = Tset + 1.0
 
-# Optionally, plot T vs t and mark regions
-plt.figure(figsize=(10,5))
-plt.plot(np.array(time, dtype=float), np.array(temp, dtype=float), label='Temperature')
-for res in results:
-	plt.axvspan(res['start_time'], res['end_time'], color='orange', alpha=0.2)
-plt.xlabel('Time (s)')
-plt.ylabel('Temperature (C)')
-plt.title('Specific Heat Capacity Heating Regions')
-plt.legend()
-plt.tight_layout()
-plt.show()
+	# Find indices where temp crosses Tset and Tset+1
+	idx_start = np.argmax(temp >= Tset)
+	idx_end = np.argmax(temp >= Tset_plus)
+
+	if temp[idx_start] < Tset or temp[idx_end] < Tset_plus or idx_start == idx_end:
+		print("Could not find valid temperature interval for Tset and Tset+1.")
+		sys.exit(1)
+
+	t_start = time[idx_start]
+	t_end = time[idx_end]
+	dt = t_end - t_start
+	# Mean power during this interval
+	mean_power = np.mean(power[idx_start:idx_end+1])
+	energy = mean_power * dt  # Joules
+
+	print(f"Tset: {Tset:.2f} C to {Tset_plus:.2f} C")
+	print(f"Time interval: {t_start:.2f} s to {t_end:.2f} s (dt = {dt:.2f} s)")
+	print(f"Mean power: {mean_power:.3f} W")
+	print(f"Energy required to raise 1 deg: {energy:.2f} J")
+
+	# Plot
+	plt.figure(figsize=(10,5))
+	plt.plot(time, temp, label='Temperature')
+	plt.axhline(Tset, color='green', linestyle='--', label=f'Tset = {Tset:.2f} C')
+	plt.axhline(Tset_plus, color='red', linestyle='--', label=f'Tset+1 = {Tset_plus:.2f} C')
+	plt.axvspan(t_start, t_end, color='orange', alpha=0.2, label='Interval')
+	plt.xlabel('Time (s)')
+	plt.ylabel('Temperature (C)')
+	plt.title('Temperature Rise by 1 Degree')
+	plt.legend()
+	plt.tight_layout()
+	plt.show()
