@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -121,26 +122,41 @@ def plot_temperature_data(file_name: str, band: Optional[float] = None, tset: Op
 
 
 if __name__ == "__main__":
-    # Call plot_temperature_data with a file name and optional band argument.
-    # plot_temperature_data('baseline.csv', band=None)
-    # plot_temperature_data('simple_hysteresis.csv')
-    # plot_temperature_data('proportional_0.1_offset.csv')
-    # plot_temperature_data('proportional_0.165_offset.csv')
-    # plot_temperature_data('proportional_0.165_offset_1_band.csv', band=1.0)
-    # plot_temperature_data("integral_0.165_offset_1_band.csv", band=1.0)
-    # plot_temperature_data("live_plot_20251027_164240.csv", band=1.0)
-
-    # Allow CLI usage: python temp_plot.py <csv_file> [band]
+    # Allow CLI usage: python temp_plot.py <csv_file> [band] [tset] [auto]
+    auto = False
+    fname = None
+    band = None
+    tset = None
     if len(sys.argv) > 1:
-        fname = sys.argv[1]
-        band = float(sys.argv[2]) if len(sys.argv) > 2 else None
-        tset = float(sys.argv[3]) if len(sys.argv) > 3 else None
+        # Check if 'auto' is present as an argument
+        if any(arg.lower() == "auto" for arg in sys.argv[1:]):
+            auto = True
+        else:
+            fname = sys.argv[1]
+            band = float(sys.argv[2]) if len(sys.argv) > 2 else None
+            tset = float(sys.argv[3]) if len(sys.argv) > 3 else None
     else:
-        # Prompt for file name if not provided
-        fname = input("File name: ")
-        band_input = input("Band (optional, press Enter to skip): ")
-        tset_input = input("Tset (optional, press Enter to skip): ")
-        band = float(band_input) if band_input else None
-        tset = float(tset_input) if tset_input else None
+        # Prompt for file name or auto
+        mode = input("Enter 'auto' to plot all from manifest, or press Enter for manual: ").strip().lower()
+        if mode == "auto":
+            auto = True
+        else:
+            fname = mode if mode else input("File name: ")
+            band_input = input("Band (optional, press Enter to skip): ")
+            tset_input = input("Tset (optional, press Enter to skip): ")
+            band = float(band_input) if band_input else None
+            tset = float(tset_input) if tset_input else None
 
-    plot_temperature_data(fname, band, tset)
+    if auto:
+        # Load manifest.json and run plot_temperature_data for each entry
+        manifest_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/manifest.json"))
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+        for entry in manifest:
+            fname = entry.get("filename")
+            tset = entry.get("Tset")
+            band = entry.get("band")
+            print(f"Plotting {fname} (Tset={tset}, band={band})...")
+            plot_temperature_data(fname, band, tset)
+    else:
+        plot_temperature_data(fname, band, tset)
