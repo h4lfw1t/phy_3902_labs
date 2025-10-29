@@ -20,7 +20,7 @@
         "control_type": "proportional",
         "Offset": 0.1,
         "Kp": 0.3,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "proportional_0.165_offset.csv",
@@ -29,7 +29,7 @@
         "control_type": "proportional",
         "Offset": 0.165,
         "Kp": 0.3,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "proportional_0.165_offset_1_band.csv",
@@ -38,7 +38,7 @@
         "control_type": "proportional",
         "Offset": 0.165,
         "Kp": 0.3,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "integral_0.165_offset_1_band.csv",
@@ -48,7 +48,7 @@
         "Offset": 0.165,
         "Kp": 0.3,
         "Ki": 0.00001,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "live_plot_20251027_153510_integral.csv",
@@ -58,7 +58,7 @@
         "Offset": 0.165,
         "Kp": 0.3,
         "Ki": 0.00001,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "live_plot_20251027_164240_integral.csv",
@@ -68,7 +68,7 @@
         "Offset": 0.165,
         "Kp": 0.3,
         "Ki": 0.00001,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "live_plot_20251027_171632_derivative.csv",
@@ -79,7 +79,7 @@
         "Kp": 0.3,
         "Ki": 0.00001,
         "Kd": 0.0,
-        "notes": ""
+        "notes": "Aluminium"
     },
     {
         "filename": "live_plot_20251028_162354.csv",
@@ -90,6 +90,28 @@
         "Kp": 0.3,
         "Ki": 0.00001,
         "Kd": 0.00001,
-        "notes": ""
+        "notes": "Aluminium"
+    },
+    {
+        "filename": "live_plot_20251029_163401.csv",
+        "Tset": 65,
+        "band": 1,
+        "control_type": "PI",
+        "Offset": 0.25,
+        "Kp": 0.3,
+        "Ki": 0.001,
+        "Kd": 0.0,
+        "notes": "Aluminium"
+    },
+    {
+        "filename": "live_plot_20251029_170448.csv",
+        "Tset": 65,
+        "band": 1,
+        "control_type": "PID",
+        "Offset": 0.25,
+        "Kp": 0.3,
+        "Ki": 0.001,
+        "Kd": 0.001,
+        "notes": "Brass"
     }
 ]
