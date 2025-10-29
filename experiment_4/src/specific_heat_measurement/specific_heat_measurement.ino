@@ -12,9 +12,9 @@ const float dR_heater = 0.1; // uncertainty in heater resistance
 const float R_series = 100000.0; // series resistor for thermistor voltage divider
 const int heaterPin = 9; // PWM pin for heater
 const int thermistorPin = A0; // Analog pin for thermistor
-const float V_supply = 5.0; // Supply voltage (V)
+const float V_supply = 12.0; // Supply voltage (V)
 const int numSamples = 100; // Number of samples for temperature averaging
-const int pwmValue = 200; // PWM value (0-255) for heater (adjust as needed)
+const int pwmValue = 255; // PWM value (0-255) for heater (adjust as needed)
 
 // Steinhart-Hart coefficients for thermistor (update for your thermistor)
 const float A = 0.7141095422e-3, B = 2.143243110e-4, C = 1.129790692e-7;
@@ -27,7 +27,7 @@ struct Stats {
 unsigned long startTime;
 
 // Cycle control variables
-const unsigned long interval_ms = 2UL * 60UL * 1000UL; // 2 minutes in ms
+const unsigned long interval_ms = 5UL * 60UL * 1000UL; // 2 minutes in ms
 int phase = 0; // 0: heating, 1: cooling
 int cycle_count = 0;
 const int max_cycles = 2; // 2 heating + 2 cooling phases
@@ -63,10 +63,6 @@ void loop() {
         }
     }
 
-    //TODO: Implement a static phase to gauge the heat loss to the environment
-    //      This will measure the power required to maintain temperature, which
-    //      can be added to the calculations for more accurate specific heat capacity.
-
     // Set heater state
     if (!finished && phase == 0) {
         analogWrite(heaterPin, pwmValue); // Heating
@@ -86,7 +82,7 @@ void loop() {
     float t = (now - startTime) / 1000.0;
     CSVPrinter::printRow(t, temp_stats.mean, temp_stats.stddev, V_heater, I_heater, P_heater, 3);
 
-    delay(1000); // Log every second
+    delay(10); // Log every 10 ms
 }
 
 Stats measureTemperature(int pin, int n) {
