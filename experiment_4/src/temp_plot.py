@@ -18,7 +18,7 @@ class TempConstants(BaseConstants):
 
 @dataclass
 class TempConfig(BaseConfig):
-    DATA_DIR: str = "../data"
+    DATA_DIR: str = "../data/PID_data"
 
 
 CONFIG = TempConfig()
