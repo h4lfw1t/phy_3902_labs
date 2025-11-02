@@ -18,7 +18,7 @@ class TempConstants(BaseConstants):
 
 @dataclass
 class TempConfig(BaseConfig):
-    DATA_DIR: str = "../data/PID_data"
+    DATA_DIR: str = os.path.abspath(os.path.join("..", "data", "PID_data"))
 
 
 CONFIG = TempConfig()
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     if auto:
         # Load manifest.json and run plot_temperature_data for each entry
-        manifest_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/manifest.json"))
+        manifest_path = os.path.join(CONFIG.DATA_DIR, "manifest.json")
         with open(manifest_path, "r", encoding="utf-8") as f:
             manifest = json.load(f)
         for entry in manifest:
