@@ -1,0 +1,21 @@
+For the first part of the experiment that involved verifying all
+components of the circuit were functioning as expected the temperature of
+the simple on-off control code was graphed as a function of time.
+The resulting shape of the graph was a steady linear increase in
+temperature with a curved peak slightly above the target temperature of
+65°C, indicating that this strategy of heating tends to overshoot the
+target temperature.
+After the peak, there was a steeper linear decrease in temperature until
+it reached the low end of the allowed temperature band.
+This data functioned as a baseline for the required improvements to
+maintain a set temperature, as well as a reference for the improved
+performance and efficiency of a PID filter versus a traditional on-off
+temperature control.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/baseline}
+    \caption{The graph of temperature as a function of time for the simple
+    on-off circuit with a band of 3.}
+    \label{fig:baseline}
+\end{figure}

@@ -1,0 +1,30 @@
+The first step of this experiment is to establish a code to trigger the
+heating element to turn on and off with the temperature reading of the
+thermistor.
+The initial code to expand on turned on the heating element at maximum power
+until the thermistor registered a set temperature of 65°C, at which point it
+turned the element off until it reached the low temperature limit.
+The temperature was recorded roughly every second and the temperature read
+from the thermistor was graphed as a function of time.
+The shape of this graph was expected to be a positive linear trend upward with
+a peak generously above the set temperature, with a steeper decline to the low
+end of the passband indicating the circuit functioned as expected.
+The setup for this experiment was the same throughout, as the only changes
+introduced to the system were programmatic rather than physical.
+A wire diagram of the setup is shown in Figure~\ref{fig:setup_diagram}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{PID_circuit_diagram}
+    \caption{Wiring diagram of the experimental setup used for PID temperature control.}
+    \label{fig:setup_diagram}
+\end{figure}
+
+After a baseline reactivity of the system was established using the on-off
+control code, equation~\eqref{eq:power_proportional} was used to control
+the output power to the heater.
+While this improved upon the ability of the heater to keep the block
+within the hysteresis, it was still quite slow to react to the . . .
+
+Bib reference~\cite{step_response_wiki}
+Bib reference~\cite{pid_integral_windup_controlcom}
