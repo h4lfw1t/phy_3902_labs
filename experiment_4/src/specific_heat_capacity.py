@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from utils.data_processor import load_experiment_data, load_pid_data, find_stable_power_window, mean_output_power
 from utils.specific_heat_calc import output_power_to_physical_power, calc_specific_heat
 
-# Constants (from Arduino code)
+# Constants
 R_heater = 15.7  # ohms
 V_SUPPLY = 12.0
 
@@ -20,6 +20,15 @@ def get_Tset():
     return Tset
 
 def analyze_file(data_path, tset, m_block, plot=True):
+    """
+    Analyze experiment data to find energy required to raise temperature by 1 degree.
+
+    Args:
+        data_path: Path to CSV data file.
+        tset: Target temperature setpoint (deg C).
+        m_block: Mass of the block (grams).
+        plot: Whether to plot the temperature data.
+    """
     data = load_experiment_data(data_path)
     power = data['power(W)'].to_numpy(dtype=float)
     time = data['time(s)'].to_numpy(dtype=float)
@@ -27,6 +36,7 @@ def analyze_file(data_path, tset, m_block, plot=True):
     tset_plus = tset + 1.0
     idx_start = np.argmax(temp >= tset)
     idx_end = np.argmax(temp >= tset_plus)
+    # Validate indices
     if temp[idx_start] < tset or temp[idx_end] < tset_plus or idx_start == idx_end:
         print(f"Could not find valid temperature interval for Tset={tset} and Tset+1.")
         return None
@@ -50,6 +60,9 @@ def analyze_file(data_path, tset, m_block, plot=True):
     return {'energy': energy, 'dt': dt, 'mean_power': mean_power, 't_start': t_start, 't_end': t_end}
 
 def auto_mode():
+    """
+    Automatic mode: process multiple data files as specified in manifest.json.
+    """
     manifest_path = os.path.join('experiment_4', 'data', 'c_data', 'manifest.json')
     with open(manifest_path, 'r') as f:
         manifest = json.load(f)
@@ -84,7 +97,7 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'auto':
         auto_mode()
     else:
-        # Interactive/manual mode (original behavior)
+        # Interactive/manual mode
         m_block = 24.63  # grams (default)
         Tset = get_Tset()
         analyze_file('experiment_4/data/c_data/specific_heat_capacity_data_aluminium.csv', Tset, m_block, plot=True)
