@@ -1,0 +1,35 @@
+Tset: 55 C
+Average voltage (base 255): 48
+V: 48 * 12 / 255 = 2.258823529411765 V
+I = 2.26 / 15.7 =  0.1438741101536156 A
+P = I * V = 0.324986225288167 J/s
+J lost over 4.74s = 1.540434707865912 J
+
+Tset: 55.00 C to 56.00 C
+Time interval: 274.61 s to 279.34 s (dt = 4.74 s)
+Mean power: 9.172 W
+Energy required to raise 1 deg: 43.45 J
+
+Tset: 65 C
+Average (255): 67
+V: 67*12/255 = 3.152941176470588 V
+I = V / 15.7 = 0.2008242787560884 A
+P = V * I = 0.6331871377250787 J/s
+Heat Loss = P * T = 3.343228087188416
+
+Tset: 65.00 C to 66.00 C
+Time interval: 163.96 s to 169.24 s (dt = 5.28 s)
+Mean power: 9.172 W
+Energy required to raise 1 deg: 48.40 J
+
+m_brass = 79.14 g
+Average (255): 75.5
+V: 75.5 * 12 / 255 = 3.529411764705882 V
+I = V / 15.7 = 0.2248032971150244 A
+P = V * I = 0.7934234015824388 J/s
+Loss = P * T = 5.11758094020673
+
+Tset: 65.00 C to 66.00 C
+Time interval: 136.94 s to 143.39 s (dt = 6.45 s)
+Mean power: 9.172 W
+Energy required to raise 1 deg: 59.17 J

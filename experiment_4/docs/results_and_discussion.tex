@@ -1,0 +1,287 @@
+\subsection{On-Off Control Performance}
+\label{subsec:on-off-control-performance}
+
+The circuit was initially tested using a basic on-off control strategy to
+maintain a target temperature of \(55^\circ\)C. As shown in
+Figure~\ref{fig:baseline}, the system's temperature increased steadily over
+time and eventually leveled off near the target temperature.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/baseline}
+    \caption{
+        Temperature vs. time for the on-off control circuit regulating an
+        aluminum block to a target of $55^\circ$C. The system shows an
+        oscillating temperature curve, with local minima just below the set
+        temperature, demonstrating the basic performance of simple on-off
+        control.
+    }
+    \label{fig:baseline}
+\end{figure}
+
+When hysteresis control was introduced, with a 3°C range around the target
+temperature, the system exhibited a pattern of temperature fluctuations, as
+shown in Figure~\ref{fig:hysteresis}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/simple_hysteresis}
+    \caption{
+        Temperature vs. time for the on-off circuit with a 3$^\circ$C
+        hysteresis band and a $55^\circ$C target. The plot shows
+        characteristic oscillations as the heater cycles on and off,
+        with sharp increases during heating phases and less pronounced drops
+        during cooling.
+    }
+    \label{fig:hysteresis}
+\end{figure}
+
+The temperature increased steadily during heating but exceeded the upper limit
+of the range before cooling down rapidly.
+The temperature then dropped below the lower limit of the range before the
+heater turned back on.
+This uneven heating and cooling pattern suggests that the aluminum block loses
+heat slower than it absorbs heat from the heater.
+These results highlight the limited accuracy of simple on-off control methods
+for maintaining a stable temperature in systems like this.
+These measurements provided a baseline for comparing the performance of more
+advanced control methods.
+
+\subsection{Proportional Control Implementation}
+\label{subsec:proportional-control-implementation2}
+
+Proportional control was implemented to improve temperature regulation.
+This method adjusts the heater's power based on how far the current
+temperature is from the target.
+Figure~\ref{fig:proportional_3_0.1} shows the system's behavior with a
+proportionality factor (\(K_p\)) of 0.3, an offset of 0.1, and a temperature
+range of 3°C. This approach reduced the size of temperature overshoots and
+made the system more stable, although the offset value was not ideal for
+keeping the temperature close to the target.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/proportional_0.1_offset}
+    \caption{
+        Temperature vs. time for proportional control with a 3$^\circ$C band,
+        offset of 0.1, and $K_p = 0.3$ for an aluminum block at $55^\circ$C.
+        The system exhibits reduced overshoot and improved stability compared
+        to on-off control, but the offset is not fully optimized.
+    }
+    \label{fig:proportional_3_0.1}
+\end{figure}
+
+A further adjustment to the offset, increasing it to 0.165, improved the
+performance, as shown in Figure~\ref{fig:proportional_3_0.165}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/proportional_0.165_offset}
+    \caption{
+        Temperature vs. time for proportional control with a 3$^\circ$C band,
+        offset of 0.165, and $K_p = 0.3$ for an aluminum block at $55^\circ$C.
+        Improved offset tuning results in better temperature regulation and
+        smaller fluctuations.
+    }
+    \label{fig:proportional_3_0.165}
+\end{figure}
+
+The system was able to stay within the target range for longer periods, and
+the temperature fluctuations became smaller over time.
+This behavior is typical of systems using proportional control, where the
+heater's power is adjusted based on the difference between the current
+temperature and the target, allowing for smoother changes compared to simple
+on-off control.
+
+The temperature range was then reduced to 1°C while keeping the same optimized
+settings (\(K_p = 0.3\), offset = 0.165).
+This adjustment allowed the system to regulate the temperature more precisely,
+as shown in Figure~\ref{fig:proportional_1_0.165}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/proportional_0.165_offset_1_band}
+    \caption{
+        Temperature vs. time for proportional control with a 1$^\circ$C band,
+        offset of 0.165, and $K_p = 0.3$ for an aluminum block at $55^\circ$C.
+        Narrowing the control band allows for more precise temperature
+        regulation, though a small error remains.
+    }
+    \label{fig:proportional_1_0.165}
+\end{figure}
+
+However, the system still exhibited a small but consistent error, where the
+temperature was slightly higher or lower than the target.
+This occurred because proportional control requires a small difference between
+the actual and target temperatures to maintain the heater's power and balance
+heat loss to the environment.
+
+\subsection{Proportional-Integral Control}
+\label{subsec:proportional-integral-control}
+
+To address the consistent temperature error observed with proportional
+control, an integral control component was added.
+Figures~\ref{fig:integral_1_0.165},
+and~\ref{fig:live_plot_20251027_153510_integral}, show the performance of the
+proportional-integral (PI) controller with \(K_p = 0.3\), \(K_i = 0.00001\),
+an offset of 0.165, and a 1°C range, applied to the aluminum block at a target
+temperature of \(55^\circ\)C. The integral control component works by
+gradually correcting any long-term differences between the current temperature
+and the target.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/integral_0.165_offset_1_band}
+    \caption{
+        Temperature vs. time for PI control with a 1$^\circ$C band, offset of
+        0.165, $K_p = 0.3$, and $K_i = 0.00001$ for an aluminum block at
+        $55^\circ$C. The addition of integral action reduces steady-state
+        error and improves long-term stability.
+    }
+    \label{fig:integral_1_0.165}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/live_plot_20251027_153510_integral}
+    \caption{
+        Temperature vs. time for PI control (Aluminum):
+        $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$,
+        offset=0.165. The plot demonstrates the system's ability to maintain
+        temperature near the setpoint over time.
+    }
+    \label{fig:live_plot_20251027_153510_integral}
+\end{figure}
+
+This adjustment allowed the system to reduce the consistent error and
+stabilize the temperature closer to the desired value.
+Over time, the size of the temperature fluctuations decreased until the system
+maintained a more stable performance near the target.
+
+At a higher target temperature of \(65^\circ\)C, the PI controller with an
+increased integral gain (\(K_i = 0.001\)) and an offset of 0.25 showed
+effective performance, as illustrated in
+Figure~\ref{fig:live_plot_20251029_163401}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/live_plot_20251029_163401}
+    \caption{
+        Temperature vs. time for PI control at a higher setpoint ($65^\circ$C)
+        with $K_p=0.3$, $K_i=0.001$, $K_d=0.0$, and offset=0.25. The increased
+        integral gain enables faster correction of errors, demonstrating
+        adaptability to different target temperatures.
+    }
+    \label{fig:live_plot_20251029_163401}
+\end{figure}
+
+The higher integral gain allowed faster correction of temperature errors,
+demonstrating that the system could adapt effectively to different target
+temperatures.
+
+\subsection{Full PID Control and Derivative Action}
+\label{subsec:full-pid-control-and-derivative-action}
+
+The final step in the control strategy involved adding a derivative control
+component, completing the proportional-integral-derivative (PID) system.
+Derivative control helps the system respond more quickly to sudden changes in
+temperature by predicting how the temperature is likely to change.
+Figure~\ref{fig:live_plot_20251027_171632_derivative} shows the system's
+behavior with the derivative gain set to zero (\(K_d = 0.0\)), effectively
+functioning as a PI controller for comparison.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/live_plot_20251027_171632_derivative}
+    \caption{
+        Temperature vs. time for PID control (Aluminum):
+        $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$, $K_d=0.0$,
+        offset=0.165. With $K_d=0$, the system acts as a PI controller,
+        providing a baseline for comparison with full PID control.
+    }
+    \label{fig:live_plot_20251027_171632_derivative}
+\end{figure}
+
+When derivative control was activated (\(K_d = 0.00001\)), the system
+demonstrated a much faster response to sudden temperature changes, as shown in
+Figure~\ref{fig:live_plot_20251028_162354}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/live_plot_20251028_162354}
+    \caption{
+        Temperature vs. time for PID control (Aluminum):
+        $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$,
+        $K_d=0.00001$, offset=0.165. Activating derivative control results in
+        a faster response to sudden temperature changes, maintaining a much
+        tighter oscilation around the setpoint.
+    }
+    \label{fig:live_plot_20251028_162354}
+\end{figure}
+
+For instance, during testing, the temperature sensor was removed from the
+aluminum, causing it to detect a rapid drop in temperature.
+The derivative control responded by immediately increasing the heater power to
+100\%, highlighting its ability to handle unexpected changes.
+This response occurred with \(K_d = 0.001\), showing that even small
+derivative gains have a significant effect on how the system reacts to sudden
+events.
+
+However, the derivative control also introduced a drawback: it amplified
+small fluctuations in the temperature readings caused by sensor noise.
+This resulted in slightly more variability in the heater's power during normal
+operation, which partially reduced the benefits of the faster response to
+temperature changes.
+
+The PID controller was also tested on a brass block at \(65^\circ\)C, using
+\(K_p = 0.3\), \(K_i = 0.001\), \(K_d = 0.001\), and an offset of 0.25, as
+shown in Figure~\ref{fig:live_plot_20251029_170448}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../out/live_plot_20251029_170448}
+    \caption{
+        Temperature vs. time for PID control (Brass):
+        $T_\text{set}=65^\circ$C, band=1, $K_p=0.3$, $K_i=0.001$, $K_d=0.001$,
+        offset=0.25. The PID controller successfully regulates the temperature
+        of a brass block, demonstrating adaptability to different materials.
+    }
+    \label{fig:live_plot_20251029_170448}
+\end{figure}
+
+The PID controller successfully regulated the temperature of the brass block,
+demonstrating its ability to adapt to materials with different thermal properties.
+
+\subsection{Specific Heat Capacity Measurements}
+\label{subsec:specific-heat-capacity-measurements}
+
+The specific heat capacity determinations yielded results with substantial
+deviations from accepted literature values.
+For the aluminum block (\(24.64 \pm 0.005\) g), the calculated specific heat
+capacity was \(1.8 \, \frac{\text{J}}{\text{g}\cdot{}^\circ\text{C}}\),
+representing a 100\% error relative to the accepted value of
+\(0.9 \, \frac{\text{J}}{\text{g}\cdot{}^\circ\text{C}}\)~\cite{specific_heat}.
+Similarly, the brass block (\(72.35 \pm 0.005\) g) yielded
+\(0.8 \, \frac{\text{J}}{\text{g}\cdot{}^\circ\text{C}}\) compared to the
+literature value of \(0.4 \, \frac{\text{J}}{\text{g}\cdot{}^\circ\text{C}}\)
+~\cite{specific_heat}, again corresponding to a 100\% error.
+
+While it was noted that aluminum measurements typically exceed
+theoretical values in this experimental setup, the magnitude of the
+discrepancies suggests systematic error rather than random uncertainty.
+Potential error sources include: (1) inaccuracies in PWM-to-power conversion
+calculations, (2) errors in MOSFET switching efficiency modeling, (3)
+miscalibration of the energy delivery measurement, (4) unaccounted heat losses
+to the environment during the heating interval, or (5) noise amplification in
+the data acquisition chain affecting temperature change rate calculations.
+
+Experimental limitations prevented comprehensive error analysis through
+extended data collection.
+Hardware failures during the experiment, including damaged components
+requiring replacement, significantly compressed the available testing time.
+A more extensive measurement campaign spanning a wider temperature range would
+have facilitated identification of whether errors exhibited systematic trends
+or random scatter, thereby isolating the dominant uncertainty source.
+The consistent overestimation for both materials suggests a systematic
+calibration error in the power delivery measurement or energy calculation
+algorithm rather than material-specific measurement artifacts.

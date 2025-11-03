@@ -1,0 +1,20 @@
+[
+  {
+    "filename": "specific_heat_capacity_data_aluminium.csv",
+    "PID_data": "live_plot_20251029_163401.csv",
+    "Tset": 65,
+    "m_grams": 24.63
+  },
+  {
+    "filename": "specific_heat_capacity_data_aluminium.csv",
+    "PID_data": "live_plot_20251028_162354.csv",
+    "Tset": 55,
+    "m_grams": 24.63
+  },
+  {
+    "filename": "specific_heat_capacity_data_brass.csv",
+    "PID_data": "live_plot_20251029_170448.csv",
+    "Tset": 65,
+    "m_grams": 79.14
+  }
+]

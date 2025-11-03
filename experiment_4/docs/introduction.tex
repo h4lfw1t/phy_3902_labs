@@ -1,0 +1,104 @@
+Temperature control systems are fundamental in many applications, yet the
+choice of control strategy significantly impacts performance and system
+longevity.
+Simple on-off control requires substantial hysteresis to prevent excessive
+cycling, which degrades circuit lifespan as the temperature range increases.
+Moreover, on-off controllers struggle to maintain set temperatures precisely
+and perform optimally only in thermally isolated systems requiring minimal
+power.
+In contrast, PID (proportional-integral-derivative) control excels in open
+systems exposed to environmental fluctuations, enabling rapid response to
+external temperature changes.
+
+\subsection{Proportional Control}
+\label{subsec:proportional-control}
+
+The foundation of PID control is the proportional term, which supplies heater
+power proportional to the temperature error.
+The error is defined as the normalized difference between the desired and
+measured temperatures:
+
+\begin{equation}
+    E = \frac{T_{\text{set}} - T_{\text{measured}}}{\text{band}}
+    \label{eq:error}
+\end{equation}
+
+This error modulates the heater power as a fraction of maximum power:
+
+\begin{equation}
+    \text{Power} = \left( T_{\text{offset}} + k_p E \right) P_{\max}
+    \label{eq:power_proportional}
+\end{equation}
+
+where $k_p$ is a proportional gain that controls the system's responsiveness.
+By reducing power as the system approaches the set temperature, proportional
+control minimizes overshoot.
+However, the resulting temperature-time response exhibits decaying
+oscillations, motivating the addition of integral and derivative terms.
+
+\subsection{Integral and Derivative Control}
+\label{subsec:integral-and-derivative-control}
+
+Integrating the error over time corrects steady-state deviations:
+
+\begin{equation}
+    I = \int E \, dt
+    \label{eq:integral}
+\end{equation}
+
+The integral term, scaled by the constant $k_i$, is added to eliminate
+persistent errors without inducing excessive oscillations.
+Similarly, derivative control responds to the rate of change of error:
+
+\begin{equation}
+    D = -\frac{dE}{dt} = -\frac{\Delta E}{\Delta t}
+    \label{eq:derivative}
+\end{equation}
+
+where $\Delta t$ corresponds to the control loop's execution time.
+The derivative gain $k_d$ allows rapid reaction to external disturbances.
+The complete PID control law is:
+
+\begin{equation}
+    \text{Power} = \left( T_{\text{offset}} + k_p E + k_i I + k_d D \right) P_{\max}
+    \label{eq:power_PID}
+\end{equation}
+
+In systems with noisy temperature sensors, derivative control can amplify
+measurement noise, making low or zero values of $k_d$ preferable.
+
+\subsection{Specific Heat Capacity Determination}
+\label{subsec:specific-heat-capacity-determination}
+
+The specific heat capacity of test materials was determined by analyzing
+heating curves under constant power.
+A timed heating and cooling cycle was implemented: the system supplied full
+power for $x$ minutes, followed by $x$ minutes of passive cooling.
+During the heating phase, the time required to achieve a 1°C temperature rise
+was recorded.
+The specific heat capacity is calculated as:
+
+\begin{equation}
+    c = \frac{\left(P_{\text{heater}} - P_{\text{loss}}\right) \cdot \Delta t}{m \cdot \Delta T}
+    \label{eq:specific_heat}
+\end{equation}
+
+where $P_{\text{heater}}$ is the supplied heater power, $P_{\text{loss}}$
+accounts for heat dissipation, $m$ is the material mass in grams, $\Delta t$
+is the time interval, and $\Delta T = 1^{\circ}C$ is the temperature increment.
+
+Power supplied to the heater is controlled via a MOSFET, which converts a 5V
+PWM signal into a variable 12V power supply.
+The power delivered depends on the duty cycle $L$ (0--255):
+
+\begin{equation}
+    P = \frac{V^2_{\text{supply}}}{R_{\text{heater}}} \cdot \frac{L}{255}
+    \label{eq:power_mosfet}
+\end{equation}
+
+Experimental accuracy is assessed using the standard percent error formula:
+
+\begin{equation}
+    \text{Percent Error} = \frac{\left|\text{Experimental} - \text{Theoretical}\right|}{\text{Theoretical}} \times 100\%
+    \label{eq:percent_error}
+\end{equation}

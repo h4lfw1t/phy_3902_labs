@@ -1,0 +1,117 @@
+[
+  {
+    "filename": "baseline.csv",
+    "Tset": 55,
+    "band": 3,
+    "control_type": "ON-OFF",
+    "notes": "Initial baseline run"
+  },
+  {
+    "filename": "simple_hysteresis.csv",
+    "Tset": 55,
+    "band": 3,
+    "control_type": "ON-OFF",
+    "notes": "Hysteresis only"
+  },
+  {
+    "filename": "proportional_0.1_offset.csv",
+    "Tset": 55,
+    "band": 3,
+    "control_type": "proportional",
+    "Offset": 0.1,
+    "Kp": 0.3,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "proportional_0.165_offset.csv",
+    "Tset": 55,
+    "band": 3,
+    "control_type": "proportional",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "proportional_0.165_offset_1_band.csv",
+    "Tset": 55,
+    "band": 1,
+    "control_type": "proportional",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "integral_0.165_offset_1_band.csv",
+    "Tset": 55,
+    "band": 1,
+    "control_type": "PI",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "Ki": 0.00001,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "live_plot_20251027_153510_integral.csv",
+    "Tset": 55,
+    "band": 1,
+    "control_type": "PI",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "Ki": 0.00001,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "live_plot_20251027_164240_integral.csv",
+    "Tset": 55,
+    "band": 1,
+    "control_type": "PI",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "Ki": 0.00001,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "live_plot_20251027_171632_derivative.csv",
+    "Tset": 55,
+    "band": 1,
+    "control_type": "PID",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "Ki": 0.00001,
+    "Kd": 0.0,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "live_plot_20251028_162354.csv",
+    "Tset": 55,
+    "band": 1,
+    "control_type": "PID",
+    "Offset": 0.165,
+    "Kp": 0.3,
+    "Ki": 0.00001,
+    "Kd": 0.00001,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "live_plot_20251029_163401.csv",
+    "Tset": 65,
+    "band": 1,
+    "control_type": "PI",
+    "Offset": 0.25,
+    "Kp": 0.3,
+    "Ki": 0.001,
+    "Kd": 0.0,
+    "notes": "Aluminium"
+  },
+  {
+    "filename": "live_plot_20251029_170448.csv",
+    "Tset": 65,
+    "band": 1,
+    "control_type": "PID",
+    "Offset": 0.25,
+    "Kp": 0.3,
+    "Ki": 0.001,
+    "Kd": 0.001,
+    "notes": "Brass"
+  }
+]
