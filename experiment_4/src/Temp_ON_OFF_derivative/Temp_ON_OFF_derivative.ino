@@ -21,7 +21,7 @@ const int numSamples = 100; // number of samples to average for temperature meas
 const int gatePin = 9; // PWM pin to control MOSFET
 const int thermistorPin = A0; // Analog pin connected to the thermistor
 const long R_series = 100000; // series resistance for thermistor's voltage divider
-const unsigned long RESPONSE_TIME_S = 60;
+const unsigned long RESPONSE_TIME_S = 50;    // Response time of the system in seconds
 const unsigned long ActionTime = (unsigned long)(2 * RESPONSE_TIME_S * 1000); // ActionTime is twice the response time, in ms
 
 //*** Variable definitions    
@@ -35,32 +35,30 @@ Stats temp_stats; // struct to hold temperature statistics
 float A = 0.7141095422e-3, B = 2.143243110e-4, C = 1.129790692e-7; // Steinhart-Hart coefficients
 
 //*** Time associated variable definitions and declarations
-unsigned long CurrentTime;            // ms
+unsigned long CurrentTime;      // ms
 unsigned long PreviousTime = 0; // ms
-unsigned long DeltaTime;                // ms
-unsigned long MaxTime = 30;    // Time limit: Maximum duration of experiment in minutes until the heater is turned OFF.
+unsigned long DeltaTime;        // ms
+unsigned long MaxTime = 30;     // Time limit: Maximum duration of experiment in minutes until the heater is turned OFF.
 unsigned long LastIntegralUpdate = 0; // Last time the integral was updated
 unsigned long windowStartTime = 0;
 
-
-//*** Some variables that are not used now, but might become useful when you implement PID control
-float Error;        // The error (Tset - temp_average)
+float Error;        // The error (Tset - temp_average); used for proportional control
 float Offset = 0.25; // offset for proportional control
-float Previous_Error = 0.0; // necessary for the PID controller when calculating the integral and derivative
-float Kp = 0.3; // proportional gain - you can tune this value
+float Previous_Error = 0.0; // Previous error, used for integral and derivative control
+float Kp = 0.3; // proportional gain
 float Ki = 0.001; // integral gain, can be zero 
 float Kd = 0.001; // derivative gain, can be zero
 float Integral = 0.0; // Integral value: sum of the areas
 float Derivative = 0.0; // Derivative value: slope
 int Power;      // When implementing PID, Power will be calcuated and this value will be the PWM output between 0-255)
-                // Power = (Kp*Error + Ki*Integral + Kd*Derivative) * 255;
+                // Power = (Offset + Kp*Error + Ki*Integral + Kd*Derivative) * 255;
 
 // Derivative smoothing parameters
 const int DERIV_WINDOW = 10; // Number of samples for rolling average
-float errorBuffer[DERIV_WINDOW];
-unsigned long timeBuffer[DERIV_WINDOW];
-int bufferIndex = 0;
-bool bufferFilled = false;
+float errorBuffer[DERIV_WINDOW];    // Circular buffer to hold error values
+unsigned long timeBuffer[DERIV_WINDOW]; // Circular buffer to hold time values
+int bufferIndex = 0;         // Current index in the circular buffer
+bool bufferFilled = false;   // Flag to indicate if the buffer is filled
 
 void setup() {
     pinMode(gatePin, OUTPUT);
@@ -79,6 +77,7 @@ void loop() {
     get_time();
     temp_stats = measureTemperature(thermistorPin, numSamples);
 
+    // Calculate Error
     Error = (Tset - temp_stats.mean) / Band;
 
     // Reset Integral at the start of each ActionTime window
@@ -89,15 +88,17 @@ void loop() {
 
     // Accumulate error * dt within the window
     float dt = DeltaTime / 1000.0; // seconds
+    // Calculate Integral
     Integral += Error * dt;
 
-    // --- Derivative calculation with rolling average (of error) ---
+    // Derivative calculation with rolling average (of error)
     errorBuffer[bufferIndex] = Error;
     timeBuffer[bufferIndex] = CurrentTime;
     int oldestIndex = (bufferIndex + 1) % DERIV_WINDOW;
     bufferIndex = (bufferIndex + 1) % DERIV_WINDOW;
     if (bufferIndex == 0) bufferFilled = true;
 
+    // Compute Derivative
     float Derivative = 0.0;
     if (bufferFilled) {
         float errorDiff = errorBuffer[bufferIndex] - errorBuffer[oldestIndex];
@@ -107,7 +108,7 @@ void loop() {
         }
     }
 
-    // --- PID calculation ---
+    // PID calculation
     int out = (Offset + Error * Kp + Integral * Ki + Derivative * Kd) * 255;
     Power = constrain(out, 0, 255);
 
@@ -138,19 +139,20 @@ Stats measureTemperature(int pin, int numSamples) {
         temp_squared_sum += T_celsius * T_celsius;
         delay(10);
     }
+    // Improve on provided code by calculating both mean and standard deviation
     stats.mean = temp_sum / numSamples;
     float variance = (temp_squared_sum - numSamples * stats.mean * stats.mean) / (numSamples - 1);
     stats.stddev = sqrt(abs(variance));
     return stats;
 
 // For safety: The following turns off the heater if the temperature exceed the pre-defined MAX temperature
-    // if(temp_average >= Tmax){
-    //     while(1){                 // Notice that this while condition is always true, so this will permanently stop the code until you reset the Arduino
-    //         analogWrite(gatePin,0);     //turning off the heater
-    //         Serial.println("Maximum temperature has been exceeded. Heater is turned OFF. Reset Arduino to restart the program");
-    //         delay(5000);
-    //     }
-    // }    
+    if(temp_average >= Tmax){
+       while(1){                 // Notice that this while condition is always true, so this will permanently stop the code until you reset the Arduino
+            analogWrite(gatePin,0);     //turning off the heater
+            Serial.println("Maximum temperature has been exceeded. Heater is turned OFF. Reset Arduino to restart the program");
+            delay(5000);
+        }
+    }
 }
 
 //* This function keeps track of the time.
