@@ -11,7 +11,7 @@ from utils import BaseConfig, BaseConstants
 
 @dataclass
 class TempConstants(BaseConstants):
-    TSET: float = 55.0  # Target temperature in Celsius
+    TSET: float = 55.0  # Default target temperature in Celsius
     BAND: float = 3.0  # Acceptable band around target temperature
     COLS: tuple = ("time(s)", "temp_mean(C)", "temp_stddev(C)", "output_power")
 
@@ -101,6 +101,7 @@ def plot_temperature_data(file_name: str, band: Optional[float] = None, tset: Op
     else:
         min_val = temp_vals.iloc[-1]
     final_val = float(temp_vals.iloc[-1])
+    # Draw horizontal lines for max, min, and final values
     plt.axhline(y=max_val, color="red", linestyle=":", linewidth=1, label=f"Max ({max_val:.2f}°C)")
     plt.axhline(y=min_val, color="blue", linestyle=":", linewidth=1, label=f"Min ({min_val:.2f}°C)")
     plt.axhline(y=final_val, color="green", linestyle=":", linewidth=1, label=f"Final ({final_val:.2f}°C)")
