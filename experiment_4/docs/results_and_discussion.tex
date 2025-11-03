@@ -9,8 +9,13 @@ time and eventually leveled off near the target temperature.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/baseline}
-    \caption{The graph of temperature as a function of time for the simple
-    on-off with a target temperature of $55^\circ$C.}
+    \caption{
+        Temperature vs. time for the on-off control circuit regulating an
+        aluminum block to a target of $55^\circ$C. The system shows an
+        oscillating temperature curve, with local minima just below the set
+        temperature, demonstrating the basic performance of simple on-off
+        control.
+    }
     \label{fig:baseline}
 \end{figure}
 
@@ -21,8 +26,13 @@ shown in Figure~\ref{fig:hysteresis}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/simple_hysteresis}
-    \caption{The graph of temperature as a function of time for the
-    on-off circuit with a band of 3 and target temperature of $55^\circ$C.}
+    \caption{
+        Temperature vs. time for the on-off circuit with a 3$^\circ$C
+        hysteresis band and a $55^\circ$C target. The plot shows
+        characteristic oscillations as the heater cycles on and off,
+        with sharp increases during heating phases and less pronounced drops
+        during cooling.
+    }
     \label{fig:hysteresis}
 \end{figure}
 
@@ -31,7 +41,7 @@ of the range before cooling down rapidly.
 The temperature then dropped below the lower limit of the range before the
 heater turned back on.
 This uneven heating and cooling pattern suggests that the aluminum block loses
-heat faster than it absorbs heat from the heater.
+heat slower than it absorbs heat from the heater.
 These results highlight the limited accuracy of simple on-off control methods
 for maintaining a stable temperature in systems like this.
 These measurements provided a baseline for comparing the performance of more
@@ -52,10 +62,12 @@ keeping the temperature close to the target.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/proportional_0.1_offset}
-    \caption{The graph of temperature as a function of time for the
-    proportionally controlled circuit with a band of 3, offset of 0.1,
-        proportionality factor $K_p = 0.3$, and target temperature of
-        $55^\circ$C.}
+    \caption{
+        Temperature vs. time for proportional control with a 3$^\circ$C band,
+        offset of 0.1, and $K_p = 0.3$ for an aluminum block at $55^\circ$C.
+        The system exhibits reduced overshoot and improved stability compared
+        to on-off control, but the offset is not fully optimized.
+    }
     \label{fig:proportional_3_0.1}
 \end{figure}
 
@@ -65,10 +77,12 @@ performance, as shown in Figure~\ref{fig:proportional_3_0.165}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/proportional_0.165_offset}
-    \caption{The graph of temperature as a function of time for the
-    proportionally controlled circuit with a band of 3, offset of 0.165,
-        proportionality factor $K_p = 0.3$ and target temperature of
-        $55^\circ$C.}
+    \caption{
+        Temperature vs. time for proportional control with a 3$^\circ$C band,
+        offset of 0.165, and $K_p = 0.3$ for an aluminum block at $55^\circ$C.
+        Improved offset tuning results in better temperature regulation and
+        smaller fluctuations.
+    }
     \label{fig:proportional_3_0.165}
 \end{figure}
 
@@ -87,9 +101,11 @@ as shown in Figure~\ref{fig:proportional_1_0.165}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/proportional_0.165_offset_1_band}
-    \caption{The graph of temperature as a function of time for the
-    proportionally controlled circuit with a band of 1, offset of 0.165,
-        proportionality factor $K_p = 0.3$ and target temperature of $55^\circ$C.
+    \caption{
+        Temperature vs. time for proportional control with a 1$^\circ$C band,
+        offset of 0.165, and $K_p = 0.3$ for an aluminum block at $55^\circ$C.
+        Narrowing the control band allows for more precise temperature
+        regulation, though a small error remains.
     }
     \label{fig:proportional_1_0.165}
 \end{figure}
@@ -106,8 +122,7 @@ heat loss to the environment.
 To address the consistent temperature error observed with proportional
 control, an integral control component was added.
 Figures~\ref{fig:integral_1_0.165},
-~\ref{fig:live_plot_20251027_153510_integral},
-and~\ref{fig:live_plot_20251027_164240_integral} show the performance of the
+and~\ref{fig:live_plot_20251027_153510_integral}, show the performance of the
 proportional-integral (PI) controller with \(K_p = 0.3\), \(K_i = 0.00001\),
 an offset of 0.165, and a 1°C range, applied to the aluminum block at a target
 temperature of \(55^\circ\)C. The integral control component works by
@@ -117,25 +132,25 @@ and the target.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/integral_0.165_offset_1_band}
-    \caption{The graph of temperature as a function of time for the PI
-    controlled circuit with a band of 1, offset of 0.165, proportionality
-    factor $K_p = 0.3$, integral factor of $K_i = 0.00001$, and target temperature of
-        $55^\circ$C.}
+    \caption{
+        Temperature vs. time for PI control with a 1$^\circ$C band, offset of
+        0.165, $K_p = 0.3$, and $K_i = 0.00001$ for an aluminum block at
+        $55^\circ$C. The addition of integral action reduces steady-state
+        error and improves long-term stability.
+    }
     \label{fig:integral_1_0.165}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/live_plot_20251027_153510_integral}
-    \caption{Temperature vs. time for PI control (Aluminium): $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$, offset=0.165.}
+    \caption{
+        Temperature vs. time for PI control (Aluminum):
+        $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$,
+        offset=0.165. The plot demonstrates the system's ability to maintain
+        temperature near the setpoint over time.
+    }
     \label{fig:live_plot_20251027_153510_integral}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../out/live_plot_20251027_164240_integral}
-    \caption{Temperature vs. time for PI control (Aluminium): $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$, offset=0.165.}
-    \label{fig:live_plot_20251027_164240_integral}
 \end{figure}
 
 This adjustment allowed the system to reduce the consistent error and
@@ -151,7 +166,12 @@ Figure~\ref{fig:live_plot_20251029_163401}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/live_plot_20251029_163401}
-    \caption{Temperature vs. time for PI control (Aluminium): $T_\text{set}=65^\circ$C, band=1, $K_p=0.3$, $K_i=0.001$, $K_d=0.0$, offset=0.25.}
+    \caption{
+        Temperature vs. time for PI control at a higher setpoint ($65^\circ$C)
+        with $K_p=0.3$, $K_i=0.001$, $K_d=0.0$, and offset=0.25. The increased
+        integral gain enables faster correction of errors, demonstrating
+        adaptability to different target temperatures.
+    }
     \label{fig:live_plot_20251029_163401}
 \end{figure}
 
@@ -173,7 +193,12 @@ functioning as a PI controller for comparison.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/live_plot_20251027_171632_derivative}
-    \caption{Temperature vs. time for PID control (Aluminium): $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$, $K_d=0.0$, offset=0.165.}
+    \caption{
+        Temperature vs. time for PID control (Aluminum):
+        $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$, $K_d=0.0$,
+        offset=0.165. With $K_d=0$, the system acts as a PI controller,
+        providing a baseline for comparison with full PID control.
+    }
     \label{fig:live_plot_20251027_171632_derivative}
 \end{figure}
 
@@ -184,7 +209,13 @@ Figure~\ref{fig:live_plot_20251028_162354}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/live_plot_20251028_162354}
-    \caption{Temperature vs. time for PID control (Aluminium): $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$, $K_d=0.00001$, offset=0.165.}
+    \caption{
+        Temperature vs. time for PID control (Aluminum):
+        $T_\text{set}=55^\circ$C, band=1, $K_p=0.3$, $K_i=0.00001$,
+        $K_d=0.00001$, offset=0.165. Activating derivative control results in
+        a faster response to sudden temperature changes, maintaining a much
+        tighter oscilation around the setpoint.
+    }
     \label{fig:live_plot_20251028_162354}
 \end{figure}
 
@@ -209,7 +240,12 @@ shown in Figure~\ref{fig:live_plot_20251029_170448}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../out/live_plot_20251029_170448}
-    \caption{Temperature vs. time for PID control (Brass): $T_\text{set}=65^\circ$C, band=1, $K_p=0.3$, $K_i=0.001$, $K_d=0.001$, offset=0.25.}
+    \caption{
+        Temperature vs. time for PID control (Brass):
+        $T_\text{set}=65^\circ$C, band=1, $K_p=0.3$, $K_i=0.001$, $K_d=0.001$,
+        offset=0.25. The PID controller successfully regulates the temperature
+        of a brass block, demonstrating adaptability to different materials.
+    }
     \label{fig:live_plot_20251029_170448}
 \end{figure}
 
