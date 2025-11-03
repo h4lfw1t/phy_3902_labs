@@ -1,129 +1,104 @@
-The standard on-off model of temperature control needs to be relatively
-inaccurate with a large hysteresis otherwise the life span of circuitry
-decreases proportionally with the temperature range.
-The ability of the standard on-off model to maintain a set temperature is
-severely diminished because of this, and they tend to work better for
-realistic thermally isolated systems which don't need a large amount of power
-to maintain the set temperature.
-However, in this experiment the system is open to its environment and sudden
-changes in temperature from external interaction, this is the benefit of PID
-control, the system is able to react to these changes and adjust accordingly.
-The first step is to make sure the power provided to the heater is
-proportional to the amount needed for the set temperature, this helps to
-prevent the heater from overshooting the temperature as the power supplied to
-the heater decreases as it approaches the set temperature and increases as it
-drops below the desired range.
-The percentage of power applied is calculated using the error \(E\) as the
-difference between the desired and measured temperatures over the width of the
-allowed temperature band,
+Temperature control systems are fundamental in many applications, yet the
+choice of control strategy significantly impacts performance and system
+longevity.
+Simple on-off control requires substantial hysteresis to prevent excessive
+cycling, which degrades circuit lifespan as the temperature range increases.
+Moreover, on-off controllers struggle to maintain set temperatures precisely
+and perform optimally only in thermally isolated systems requiring minimal
+power.
+In contrast, PID (proportional-integral-derivative) control excels in open
+systems exposed to environmental fluctuations, enabling rapid response to
+external temperature changes.
+
+\subsection{Proportional Control}
+\label{subsec:proportional-control}
+
+The foundation of PID control is the proportional term, which supplies heater
+power proportional to the temperature error.
+The error is defined as the normalized difference between the desired and
+measured temperatures:
 
 \begin{equation}
     E = \frac{T_{\text{set}} - T_{\text{measured}}}{\text{band}}
     \label{eq:error}
 \end{equation}
 
-which was used to control the amount of power supplied to the heater as a
-percentage of the maximum amount of power.
+This error modulates the heater power as a fraction of maximum power:
 
 \begin{equation}
-    \text{Power} = ( T_{\text{offset}} + k_p E ) P_{\max}
+    \text{Power} = \left( T_{\text{offset}} + k_p E \right) P_{\max}
     \label{eq:power_proportional}
 \end{equation}
 
-The factor \(k_p\) was added to control the effects of the error calculation
-and control the speed with which the system reacts.
-While this modification continues to produce a notable degree of error, it can
-be observed that the temperature-time graph follows a decaying sinusoidal
-function permits further refinement by integrating over an interval that is
-twice the time required for the temperature to increase by an amount
-equivalent to the band amplitude.
-The integral of the error over this time interval
+where $k_p$ is a proportional gain that controls the system's responsiveness.
+By reducing power as the system approaches the set temperature, proportional
+control minimizes overshoot.
+However, the resulting temperature-time response exhibits decaying
+oscillations, motivating the addition of integral and derivative terms.
+
+\subsection{Integral and Derivative Control}
+\label{subsec:integral-and-derivative-control}
+
+Integrating the error over time corrects steady-state deviations:
 
 \begin{equation}
-    I = \int {E } dt
+    I = \int E \, dt
     \label{eq:integral}
 \end{equation}
 
-can be used in conjunction with a proportionality constant \(k_i\) to avoid
-overcorrecting the power and introducing new unwanted temperature
-oscillations.
-Adding this factor to equation~\eqref{eq:power_proportional} gives the
-following formula for a more steady code for maintaining the set temperature.
+The integral term, scaled by the constant $k_i$, is added to eliminate
+persistent errors without inducing excessive oscillations.
+Similarly, derivative control responds to the rate of change of error:
 
 \begin{equation}
-    \text{Power} = (T_{\text{offset}} + k_p E + k_i I) P_{\max}
-    \label{eq:power_integral}
-\end{equation}
-
-The final adjustment is to control the temperature when reacting to external
-stimuli using derivative control.
-If the temperature of the environment or the block suddenly spikes or drops,
-this factor will allow the heater to react proportionally to the rate of
-change of the error calculated by equation~\eqref{eq:error}.
-This derivative \(D\) can be found by dividing the negative of the change in
-error by the time interval over which this change is measured, the action time
-of the code, using the following equation.
-
-\begin{equation}
-    D = - \frac{dE}{dx} = - \frac{\Delta{E}}{\Delta{x}}
+    D = -\frac{dE}{dt} = -\frac{\Delta E}{\Delta t}
     \label{eq:derivative}
 \end{equation}
 
-This value can be used in conjunction with an associated proportionality
-constant \(k_d\) and introduced to equation~\eqref{eq:power_integral} to produce the final
-equation for maintaining the set temperature
+where $\Delta t$ corresponds to the control loop's execution time.
+The derivative gain $k_d$ allows rapid reaction to external disturbances.
+The complete PID control law is:
 
 \begin{equation}
-    \text{Power} = ( T_{\text{offset}} + k_p E + k_i I + k_d D) P_{\max}
+    \text{Power} = \left( T_{\text{offset}} + k_p E + k_i I + k_d D \right) P_{\max}
     \label{eq:power_PID}
 \end{equation}
 
-While the sum of all three of these terms is very beneficial for a fast and
-highly variable system, in this experimental setup it is possible that the
-derivative control can cause any noise in the temperature sensor to be
-amplified, so it may be beneficial to use a low or zero value for the
-proportionality constant \(k_d\).
+In systems with noisy temperature sensors, derivative control can amplify
+measurement noise, making low or zero values of $k_d$ preferable.
 
-The final step was to determine the specific heat capacity of two metal blocks.
-This was done by using the PID program at three different set temperatures to
-determine the average amount of power in watts required to maintain those
-temperatures, and thus, the heat loss over time from the block to the
-surroundings.
-The specific heat capacity of the material was determined by analyzing its
-heating curve when supplied with full power via a MOSFET. A program was
-implemented to operate the heater in timed cycles, consisting of \(x\)
-minutes of heating followed by \(x\) minutes of cooling.
-During the heating phase, the time (\(t\)) required to increase the
-temperature of the material by 1°C was recorded under a constant 12V power
-supply.
-The specific heat capacity (\(c\)) was calculated using the following equation:
+\subsection{Specific Heat Capacity Determination}
+\label{subsec:specific-heat-capacity-determination}
+
+The specific heat capacity of test materials was determined by analyzing
+heating curves under constant power.
+A timed heating and cooling cycle was implemented: the system supplied full
+power for $x$ minutes, followed by $x$ minutes of passive cooling.
+During the heating phase, the time required to achieve a 1°C temperature rise
+was recorded.
+The specific heat capacity is calculated as:
 
 \begin{equation}
-    c = \frac{(P_{\text{heater}} - P_{\text{loss}}) \cdot \Delta{t}}{m \cdot \Delta{T}}
+    c = \frac{\left(P_{\text{heater}} - P_{\text{loss}}\right) \cdot \Delta t}{m \cdot \Delta T}
     \label{eq:specific_heat}
 \end{equation}
 
-In this equation, \(P_{\text{heater}}\) represents the power supplied to the
-heater, \(P_{\text{loss}}\) accounts for heat losses to the surroundings,
-\(m\) is the mass of the material in grams, \(\Delta{t}\) is the time
-interval, and \(\Delta{T}\) is the temperature change (1°C). The timed heating
-and cooling cycles allow for a controlled measurement of the energy required
-to raise the material’s temperature, which is then used to determine its
-specific heat capacity.
-For this experiment, a MOSFET determines how much power is supplied to the
-heater based on a duty cycle out of 255 which maps the 5V PWM source to the
-additional 12V power source connected to the heater meaning the power
-supplied to the heater was determined using
+where $P_{\text{heater}}$ is the supplied heater power, $P_{\text{loss}}$
+accounts for heat dissipation, $m$ is the material mass in grams, $\Delta t$
+is the time interval, and $\Delta T = 1^{\circ}C$ is the temperature increment.
+
+Power supplied to the heater is controlled via a MOSFET, which converts a 5V
+PWM signal into a variable 12V power supply.
+The power delivered depends on the duty cycle $L$ (0--255):
 
 \begin{equation}
-    P = \frac{V^2_{\text{supply}}}{R_{\text{heater}}} * \frac{L}{255}
+    P = \frac{V^2_{\text{supply}}}{R_{\text{heater}}} \cdot \frac{L}{255}
     \label{eq:power_mosfet}
 \end{equation}
 
-where \(L\) is the duty cycle of the MOSFET. The error throughout the
-experiment was calculated using the traditionally accepted model
+Experimental accuracy is assessed using the standard percent error formula:
 
 \begin{equation}
-    \text{Percent Error} = \frac{\left|\text{Experimental - Theoretical}\right|}{\text{Theoretical}} \times 100\%
+    \text{Percent Error} = \frac{\left|\text{Experimental} - \text{Theoretical}\right|}{\text{Theoretical}} \times 100\%
     \label{eq:percent_error}
 \end{equation}
