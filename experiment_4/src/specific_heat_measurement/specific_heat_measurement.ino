@@ -1,22 +1,18 @@
 // Arduino code to experimentally determine the specific heat capacity of a metal block
-// Block mass, heater resistance, and series resistor are defined as constants
 // Heater is controlled via PWM on pin 9, thermistor is read from A0
 // Data is output as CSV: time(s), temp(C), voltage(V), current(A), power(W)
 
 #include "CSVPrinter.h"
 
-const float m_block = 24.63; // mass of the aluminum block in grams
-const float dm_block = 0.005; // uncertainty in mass of the aluminum block in grams
 const float R_heater = 15.7; // resistance of the heater in ohms
-const float dR_heater = 0.1; // uncertainty in heater resistance
 const float R_series = 100000.0; // series resistor for thermistor voltage divider
 const int heaterPin = 9; // PWM pin for heater
 const int thermistorPin = A0; // Analog pin for thermistor
 const float V_supply = 12.0; // Supply voltage (V)
 const int numSamples = 100; // Number of samples for temperature averaging
-const int pwmValue = 255; // PWM value (0-255) for heater (adjust as needed)
+const int pwmValue = 255; // PWM value (0-255) for heater
 
-// Steinhart-Hart coefficients for thermistor (update for your thermistor)
+// Steinhart-Hart coefficients for thermistor
 const float A = 0.7141095422e-3, B = 2.143243110e-4, C = 1.129790692e-7;
 
 struct Stats {
