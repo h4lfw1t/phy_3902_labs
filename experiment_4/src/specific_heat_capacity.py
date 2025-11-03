@@ -55,8 +55,12 @@ def auto_mode():
         manifest = json.load(f)
     for entry in manifest:
         print(f"\n--- Analyzing {entry['filename']} at Tset={entry['Tset']} ---")
-        data_path = os.path.join('experiment_4', 'data', 'c_data', entry['filename'])
-        pid_path = os.path.join('experiment_4', 'data', 'PID_data', entry['PID_data'])
+        data_path = os.path.abspath(
+            os.path.join('experiment_4', 'data', 'c_data', entry['filename'])
+        )
+        pid_path = os.path.abspath(
+            os.path.join('experiment_4', 'data', 'PID_data', entry['PID_data'])
+        )
         tset = entry['Tset']
         m_block = entry['m_grams']
         # Main experiment analysis
