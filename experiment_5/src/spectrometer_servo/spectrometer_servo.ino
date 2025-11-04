@@ -65,7 +65,7 @@ void loop() {
     if (hasRun) {
         return; // Only run once
     }
-    for (pos = 0; pos <= 360; pos += 1) {
+    for (pos = 0; pos <= 180; pos += 2) {
         myServo.write(pos);
         delay(50); // Wait for servo to reach position
 
@@ -74,14 +74,14 @@ void loop() {
         LDRStats stats = averageReadLDR(LDR_PIN, NUM_SAMPLES);
         float ldrValue = stats.mean; // Use mean value for CSV
         float ldrStdDev = stats.stddev; // Use standard deviation for CSV
-        float positionMeters = (pos / 360.0) * STAGE_LENGTH; // Convert to meters
+        float positionMeters = (pos / 180.0) * STAGE_LENGTH; // Convert to meters
 
         // Print CSV row
         CSVPrinter::printRow(positionMeters, ldrValue, ldrStdDev);
 
-        delay(100);
+        delay(10);
     }
-    for (pos = 360; pos >= 0; pos -= 1) {
+    for (pos = 180; pos >= 0; pos -= 2) {
         myServo.write(pos);
         delay(50); // Wait for servo to reach position
 
@@ -89,12 +89,12 @@ void loop() {
         LDRStats stats = averageReadLDR(LDR_PIN, NUM_SAMPLES);
         float ldrValue = stats.mean; // Use mean value for CSV
         float ldrStdDev = stats.stddev; // Use standard deviation for CSV
-        float positionMeters = (pos / 360.0) * STAGE_LENGTH; // Convert to meters
+        float positionMeters = (pos / 180.0) * STAGE_LENGTH; // Convert to meters
 
         // Print CSV row
         CSVPrinter::printRow(positionMeters, ldrValue, ldrStdDev);
 
-        delay(100);
+        delay(10);
     }
     // hasRun = true;
 }
