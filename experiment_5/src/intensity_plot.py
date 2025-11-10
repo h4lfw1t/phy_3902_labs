@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 from scipy.ndimage import label as sc_label
 from dataclasses import dataclass
-from utils import DataProcessing
+# from utils import DataProcessing
+from data_processor import DataProcessor
 
 @dataclass
 class IntensityConfig:
@@ -19,7 +20,7 @@ class IntensityConfig:
 
 CONSTANTS = IntensityConfig()
 
-data_proc = DataProcessing()
+data_proc = DataProcessor()
 
 def find_fringe_regions(intensity, threshold=0.1):
     """
