@@ -6,13 +6,16 @@ import numpy as np
 import pandas as pd
 from scipy.ndimage import label as sc_label
 from dataclasses import dataclass
-# from utils import DataProcessing
-from data_processor import DataProcessor
+from typing import List
+from utils import DataProcessing
 
 @dataclass
 class IntensityConfig:
     DATA_DIR: str = os.path.abspath(
         os.path.join("..", "data", "intensity_data")
+    )
+    OUT_DIR = os.path.abspath(
+        os.path.join("..", "out", "intensity_plots")
     )
     R_SERIES: float = 9970     # Resistance in ohms
     V_IN: float = 5.0          # Input voltage
@@ -20,7 +23,7 @@ class IntensityConfig:
 
 CONSTANTS = IntensityConfig()
 
-data_proc = DataProcessor()
+data_proc = DataProcessing()
 
 def find_fringe_regions(intensity, threshold=0.1):
     """
@@ -53,7 +56,9 @@ def log_fringe_regions(regions):
 
 def plot_intensity(data_file, output_file):
     # Read the data from CSV file
-    data = pd.read_csv(data_file)
+    data_path = os.path.join(CONSTANTS.DATA_DIR, data_file)
+    output_file = os.path.join(CONSTANTS.OUT_DIR, output_file)
+    data = pd.read_csv(data_path)
 
     # Extract position and intensity columns
     position = data_proc.steps_to_linear_position(data['position'], max_steps=1800, linear_scale=0.05)
@@ -70,7 +75,7 @@ def plot_intensity(data_file, output_file):
     # Detect outer fringes
     outer_fringe_regions = find_fringe_regions(
         intensity,
-        threshold=0.025,
+        threshold=0.001,
     )
 
     # Filter overlapping regions
@@ -113,8 +118,10 @@ def plot_intensity(data_file, output_file):
     log_fringe_regions(fringe_regions)
 
     # Print distance between fringes
-    fringe_distances = data_proc.get_fringe_distance(position, center_fringe_regions[0], filtered_outer) if center_fringe_regions else []
-    print(f"Fringe distances from center: {fringe_distances}")
+    fringe_distances: List[np.float64] = data_proc.get_fringe_distance(position, center_fringe_regions[0], filtered_outer) if center_fringe_regions else []
+    print(f"Fringe distances from center:")
+    for i, dist in enumerate(fringe_distances, 1):
+        print(f"  Fringe {i}: {dist}")
 
     plt.title('LDR Feedback vs Position')
     plt.xlabel('Position (m)')
@@ -123,13 +130,17 @@ def plot_intensity(data_file, output_file):
     plt.legend()
 
     # Save the plot to a file
+    os.makedirs(CONSTANTS.OUT_DIR, exist_ok=True)
+    print(f"Saving plot to {output_file}")
     plt.savefig(output_file)
     plt.show()
     plt.close()
 
-def plot_gradient(data_file, output_file):
+def plot_gradient(data_file):
     # Read the data from CSV file
-    data = pd.read_csv(data_file)
+    data_path = os.path.join(CONSTANTS.DATA_DIR, data_file)
+    # output_path = os.path.join(CONSTANTS.OUT_DIR, output_file)
+    data = pd.read_csv(data_path)
 
     # Extract position and intensity columns using data processing module
     position = data_proc.steps_to_linear_position(data['position'], max_steps=1800, linear_scale=0.05)
@@ -163,13 +174,45 @@ def plot_gradient(data_file, output_file):
     plt.legend()
 
     # Save the plot to a file
-    plt.savefig(output_file)
+    # plt.savefig(output_path)
     plt.show()
     plt.close()
 
 if __name__ == "__main__":
-    data_file = os.path.join(CONSTANTS.DATA_DIR, "sample.csv")
-    output_file = os.path.join(CONSTANTS.DATA_DIR, "sample.png")
-    gradient_output_file = os.path.join(CONSTANTS.DATA_DIR, "sample_gradient.png")
-    plot_intensity(data_file, output_file)
-    # plot_gradient(data_file, gradient_output_file)
+    # Allow CLI usage: python intensity_plot.py <csv_file> [output_file] [auto]
+    auto = False
+    fname = None
+    output_file = None
+    default_output_file = lambda fname: os.path.splitext(fname)[0] + "_intensity.png"
+
+    if len(sys.argv) > 1:
+        # Check if 'auto' is present as an argument
+        if any(arg.lower() == "auto" for arg in sys.argv[1:]):
+            auto = True
+        else:
+            fname = sys.argv[1]
+            output_file = sys.argv[2] if len(sys.argv) > 2 else default_output_file(fname)
+    else:
+        # Prompt for file name or auto
+        mode = input("Enter 'auto' to plot all from manifest, or press Enter for manual: ").strip().lower()
+        if mode == "auto":
+            auto = True
+        else:
+            fname = mode if mode else input("File name: ")
+            output_file = input("Output file (optional, press Enter to skip): ")
+            if not output_file:
+                output_file = default_output_file(fname)
+
+    if auto:
+        # Load manifest.json and run plot_intensity for each entry
+        manifest_path = os.path.join(CONSTANTS.DATA_DIR, "manifest.json")
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+        for entry in manifest:
+            fname = entry.get("filename")
+            output_file = default_output_file(fname)
+            print(f"Plotting {fname} . . .")
+            plot_intensity(fname, output_file)
+            # plot_gradient(fname)
+    else:
+        plot_intensity(fname, output_file)

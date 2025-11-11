@@ -2,7 +2,7 @@
 
 import numpy as np
 import sympy as sp
-from error_propagation import ErrorPropagation
+from .error_propagation import ErrorPropagation
 
 class DataProcessing:
     def __init__(self, r_series=9970, v_in=5.0, resolution=1023):

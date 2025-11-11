@@ -49,7 +49,7 @@ void setup() {
     }
 
     CSVPrinter::printHeader("position,ldr_mean,ldr_stddev");
-    delay(50); // Allow time for laser to stabilize
+    delay(7000); // Allow time for laser to stabilize and for me to open the Serial Monitor
 }
 
 void loop() {
