@@ -1,12 +1,9 @@
 
 # TODO:
- - Create data processing module for converting csv data to plottable data
-    - Functions for converting ldr adc_value to voltage, followed by voltage to intensity, with error (move from intensity_plot.py)
-    - Functions for converting stepper motor steps to linear position (move from intensity_plot.py)
-    - Transform position data based on calculated center fringe position, to align center fringe at position 0 before plotting
-    - Update intensity_plot.py to use data processing module
-    - Add method to get distance between fringes based on center fringe position
-    - Add method to calculate angle based on fringe distance and experimental setup
+ - Swap wavelength calculation for refractive index calculation
+    - Implement refractive index calculation method in DataProcessing class
+    - Use existing fringe data to compute refractive index instead of wavelength
+    - Use baseline measurement in air to determine the difference between known refractive index of air, and that of the air + cuvette. From there, calculate refractive index of cuvette, to then use in further calculations.
 
  - Create logging module or add detailed console outputs
     - Print fringe regions to console, including center fringe and outer fringes detected
