@@ -3,18 +3,28 @@
         "filename": "air_data.csv",
         "refractive_index": 1.000293,
         "distance": 0.05,
+        "diffraction_grating": 527559,
         "notes": "Air at SATP"
     },
     {
         "filename": "cuvette_data.csv",
         "refractive_index": "unknown",
         "distance": 0.05,
+        "diffraction_grating": 527559,
         "notes": "Cuvette with unknown refractive index. Bad results, don't use."
     },
     {
         "filename": "ethanol_data.csv",
         "refractive_index": 1.361,
         "distance": 0.05,
+        "diffraction_grating": 527559,
         "notes": "Ethanol at SATP"
+    },
+    {
+        "filename": "water_data.csv",
+        "refractive_index": 1.333,
+        "distance": 0.05,
+        "diffraction_grating": 527559,
+        "notes": "Tap water at SATP"
     }
 ]
