@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from scipy.ndimage import label as sc_label
 from dataclasses import dataclass
-from typing import List
 from utils import DataProcessing
 
 @dataclass
@@ -75,7 +74,7 @@ def plot_intensity(data_file, output_file):
     # Detect outer fringes
     outer_fringe_regions = find_fringe_regions(
         intensity,
-        threshold=0.001,
+        threshold=0.002,
     )
 
     # Filter overlapping regions
@@ -117,11 +116,43 @@ def plot_intensity(data_file, output_file):
         )
     log_fringe_regions(fringe_regions)
 
-    # Print distance between fringes
-    fringe_distances: List[np.float64] = data_proc.get_fringe_distance(position, center_fringe_regions[0], filtered_outer) if center_fringe_regions else []
-    print(f"Fringe distances from center:")
-    for i, dist in enumerate(fringe_distances, 1):
-        print(f"  Fringe {i}: {dist}")
+    def assign_fringe_numbers(position, center_fringe_region, outer_fringe_regions):
+        """
+        Assigns fringe numbers to each outer fringe relative to the center.
+        Returns a list of (fringe_number, region) tuples.
+        """
+        center_idx = (center_fringe_region[0] + center_fringe_region[1]) // 2
+        center_pos = position[center_idx]
+        numbered = []
+        # Calculate center positions for each outer fringe
+        outer_centers = [((start + end) // 2, (start, end)) for start, end in outer_fringe_regions]
+        # Sort by position relative to center
+        outer_centers.sort(key=lambda x: position[x[0]] - center_pos)
+        left = [r for i, r in outer_centers if position[i] < center_pos]
+        right = [r for i, r in outer_centers if position[i] > center_pos]
+        # Assign negative numbers to left, positive to right
+        for n, region in enumerate(reversed(left), 1):
+            numbered.append((-n, region))
+        for n, region in enumerate(right, 1):
+            numbered.append((n, region))
+        return numbered
+
+    fringe_numbered = assign_fringe_numbers(position, center_fringe_regions[0], filtered_outer)
+    print("Fringe numbers and regions:")
+    for number, (start, end) in fringe_numbered:
+        print(f"  Fringe {number}: {start} to {end}")
+
+    # Use get_fringe_distance for all outer fringes
+    if center_fringe_regions:
+        fringe_distances = data_proc.get_fringe_distance(position, center_fringe_regions[0], [region for _, region in fringe_numbered])
+        for (num, region), fringe_distance in zip(fringe_numbered, fringe_distances):
+            wavelength = data_proc.calculate_wavelength(
+                abs(num),
+                fringe_distance,
+                1 / 527559,  # Diffraction grating spacing in meters
+                setup_length=0.05  # Setup length in meters
+            )
+            print(f"  Fringe {num}: Distance = {fringe_distance:.6g} m, Wavelength = {wavelength:.6g} nm")
 
     plt.title('LDR Feedback vs Position')
     plt.xlabel('Position (m)')

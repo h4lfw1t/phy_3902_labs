@@ -60,7 +60,12 @@ class DataProcessing:
             distances.append(abs(outer_pos - center_pos))
         return distances
 
-    def calculate_angle(self, fringe_distance, wavelength, setup_length):
+    def __calculate_angle(self, fringe_distance, setup_length):
         """Calculate angle based on fringe distance and experimental setup."""
-        # Example: theta = arctan(fringe_distance / setup_length)
         return np.arctan(fringe_distance / setup_length)
+
+    def calculate_wavelength(self, fringe_number, fringe_distance, spacing, setup_length):
+        """Calculate wavelength using fringe data and experimental parameters."""
+        angle = self.__calculate_angle(fringe_distance, setup_length)
+        wavelength = (spacing * np.sin(angle)) / fringe_number
+        return wavelength
