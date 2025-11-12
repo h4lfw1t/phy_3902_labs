@@ -60,7 +60,8 @@ class DataProcessing:
             distances.append(abs(outer_pos - center_pos))
         return distances
 
-    def __calculate_angle(self, fringe_distance, setup_length):
+    @staticmethod
+    def __calculate_angle(fringe_distance, setup_length):
         """Calculate angle based on fringe distance and experimental setup."""
         return np.arctan(fringe_distance / setup_length)
 
@@ -69,3 +70,8 @@ class DataProcessing:
         angle = self.__calculate_angle(fringe_distance, setup_length)
         wavelength = (spacing * np.sin(angle)) / fringe_number
         return wavelength
+
+    def calculate_refractive_index(self, fringe_distance, spacing, wavelength, setup_length):
+        angle = self.__calculate_angle(fringe_distance, setup_length)
+        n = (spacing * np.sin(angle)) / wavelength
+        return n
