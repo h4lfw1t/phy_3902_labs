@@ -1,30 +1,37 @@
 [
     {
         "filename": "air_data.csv",
-        "refractive_index": 1.000293,
-        "distance": 0.05,
-        "diffraction_grating": 527559,
+        "wavelength": 650e-9,
         "notes": "Air at SATP"
     },
     {
         "filename": "cuvette_data.csv",
-        "refractive_index": "unknown",
-        "distance": 0.05,
-        "diffraction_grating": 527559,
+        "wavelength": 650e-9,
         "notes": "Cuvette with unknown refractive index. Bad results, don't use."
     },
     {
         "filename": "ethanol_data.csv",
-        "refractive_index": 1.361,
-        "distance": 0.05,
-        "diffraction_grating": 527559,
+        "wavelength": 650e-9,
         "notes": "Ethanol at SATP"
     },
     {
         "filename": "water_data.csv",
-        "refractive_index": 1.333,
-        "distance": 0.05,
-        "diffraction_grating": 527559,
+        "wavelength": 650e-9,
         "notes": "Tap water at SATP"
+    },
+    {
+        "filename": "water_532_data.csv",
+        "wavelength": 532e-9,
+        "notes": "Water at SATP with green laser (532 nm)"
+    },
+    {
+        "filename": "air_532_data.csv",
+        "wavelength": 532e-9,
+        "notes": "Air at SATP with green laser (532 nm)"
+    },
+    {
+        "filename": "ethanol_532_data.csv",
+        "wavelength": 532e-9,
+        "notes": "Ethanol at SATP with green laser (532 nm)"
     }
 ]
