@@ -19,8 +19,6 @@ class IntensityConfig:
     R_SERIES: float = 9970                  # Resistance in ohms
     V_IN: float = 5.0                       # Input voltage
     RESOLUTION: int = 1023                  # ADC resolution
-    # Distance from grating to detector in meters
-    SETUP_LENGTH: float = 0.045
     DIFFRACTION_GRATING: float = 527559     # lines per meter
     # Minimum width of fringe region in data points
     FRINGE_MIN_WIDTH: int = 10
@@ -43,11 +41,20 @@ fringe_analyzer = FringeAnalysis(
     fringe_min_width=IntensityConfig.FRINGE_MIN_WIDTH)
 
 
-def plot_intensity(data_file, output_file):
+def plot_intensity(data_file, output_file, manifest):
     # Read the data from CSV file
     data_path = os.path.join(CONSTANTS.DATA_DIR, data_file)
     output_file = os.path.join(CONSTANTS.OUT_DIR, output_file)
     data = pd.read_csv(data_path)
+    manifest_entry = manifest.get(data_file, {})
+    if not manifest_entry:
+        print(f"{YELLOW}Warning: No manifest entry found for {data_file}.{RESET}")
+        return
+
+    # Extract relevant information from the manifest entry
+    vacuum_wavelength = manifest_entry.get("wavelength", 650e-9)
+    setup_length = manifest_entry.get("setup_length", 0.045)
+    notes = manifest_entry.get("notes", "")
 
     # Extract position and intensity columns
     position = data_proc.steps_to_linear_position(
@@ -108,35 +115,26 @@ def plot_intensity(data_file, output_file):
 
     # Use get_fringe_distance for all outer fringes
     fringe_distances = []
-    wavelengths = []
     refractive_indices = []
-    vacuum_wavelength = None
-    manifest_entry = None
+    wavelengths = []
     if center_fringe_regions:
         fringe_distances = data_proc.get_fringe_distance(
             position,
             center_fringe_regions[0],
             [region for _, region in fringe_numbered],
         )
-        # Get vacuum wavelength from manifest
-        with open(CONSTANTS.MANIFEST_PATH, "r", encoding="utf-8") as f:
-            manifest = json.load(f)
-        manifest_entry = next(
-            (e for e in manifest if e["filename"] == data_file), None)
-        vacuum_wavelength = manifest_entry.get(
-            "wavelength", 650e-9) if manifest_entry else 650e-9
         for (num, _), fringe_distance in zip(fringe_numbered, fringe_distances):
             wl = data_proc.calculate_wavelength(
                 abs(num),
                 fringe_distance,
                 1 / CONSTANTS.DIFFRACTION_GRATING,
-                setup_length=CONSTANTS.SETUP_LENGTH,
+                setup_length=setup_length,
             )
             n = data_proc.calculate_refractive_index(
                 fringe_distance,
                 1 / CONSTANTS.DIFFRACTION_GRATING,
                 vacuum_wavelength,
-                setup_length=CONSTANTS.SETUP_LENGTH,
+                setup_length=setup_length,
             )
             wavelengths.append(wl * 1e9)  # Convert to nm for summary
             refractive_indices.append(n)
@@ -153,7 +151,7 @@ def plot_intensity(data_file, output_file):
         vacuum_wavelength
     )
     print(
-        f"{CYAN}--- Intensity Plot Summary for {data_file} ---{RESET}\n{summary}\n")
+        f"{CYAN}--- Intensity Plot Summary for {data_file} ---{RESET}\nNotes: {notes}\n{summary}\n")
 
     plt.title('LDR Feedback vs Position')
     plt.xlabel('Position (m)')
@@ -172,6 +170,10 @@ if __name__ == "__main__":
     auto = False
     fname = None
     output_file = None
+
+    # Load manifest.json and run plot_intensity for each entry
+    with open(CONSTANTS.MANIFEST_PATH, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
 
     def default_output_file(fname): return os.path.splitext(fname)[
         0] + "_intensity.png"
@@ -198,12 +200,8 @@ if __name__ == "__main__":
                 output_file = default_output_file(fname)
 
     if auto:
-        # Load manifest.json and run plot_intensity for each entry
-        with open(CONSTANTS.MANIFEST_PATH, "r", encoding="utf-8") as f:
-            manifest = json.load(f)
-        for entry in manifest:
-            fname = entry.get("filename")
+        for fname in manifest.keys():
             output_file = default_output_file(fname)
-            plot_intensity(fname, output_file)
+            plot_intensity(fname, output_file, manifest)
     else:
-        plot_intensity(fname, output_file)
+        plot_intensity(fname, output_file, manifest)

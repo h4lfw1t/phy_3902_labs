@@ -4,6 +4,7 @@ import numpy as np
 import sympy as sp
 from .error_propagation import ErrorPropagation
 
+
 class DataProcessing:
     def __init__(self, r_series=9970, v_in=5.0, resolution=1023):
         self.r_series = r_series
@@ -35,7 +36,8 @@ class DataProcessing:
         for val, std in zip(adc_values, adc_stddev):
             values = {adc: val}
             uncertainties = {adc: std}
-            err = ErrorPropagation.propagate_error(intensity_expr, [adc], values, uncertainties)
+            err = ErrorPropagation.propagate_error(
+                intensity_expr, [adc], values, uncertainties)
             intensity_errors.append(err)
         return intensities, intensity_errors
 
