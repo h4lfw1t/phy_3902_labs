@@ -1,37 +1,52 @@
-[
-    {
-        "filename": "air_data.csv",
+{
+    "air_data.csv": {
         "wavelength": 650e-9,
+        "setup_length": 0.045,
         "notes": "Air at SATP"
     },
-    {
-        "filename": "cuvette_data.csv",
+    "cuvette_data.csv": {
         "wavelength": 650e-9,
+        "setup_length": 0.045,
         "notes": "Cuvette with unknown refractive index. Bad results, don't use."
     },
-    {
-        "filename": "ethanol_data.csv",
+    "ethanol_data.csv": {
         "wavelength": 650e-9,
+        "setup_length": 0.045,
         "notes": "Ethanol at SATP"
     },
-    {
-        "filename": "water_data.csv",
+    "water_data.csv": {
         "wavelength": 650e-9,
+        "setup_length": 0.045,
         "notes": "Tap water at SATP"
     },
-    {
-        "filename": "water_532_data.csv",
+    "water_532_data.csv": {
         "wavelength": 532e-9,
+        "setup_length": 0.045,
         "notes": "Water at SATP with green laser (532 nm)"
     },
-    {
-        "filename": "air_532_data.csv",
+    "air_532_data.csv": {
         "wavelength": 532e-9,
+        "setup_length": 0.045,
         "notes": "Air at SATP with green laser (532 nm)"
     },
-    {
-        "filename": "ethanol_532_data.csv",
+    "ethanol_532_data.csv": {
         "wavelength": 532e-9,
+        "setup_length": 0.045,
         "notes": "Ethanol at SATP with green laser (532 nm)"
+    },
+    "air_v2.csv": {
+        "wavelength": 650e-9,
+        "setup_length": 0.0525,
+        "notes": "Air at SATP with dark box"
+    },
+    "evoo_data.csv": {
+        "wavelength": 650e-9,
+        "setup_length": 0.037,
+        "notes": "Extra Virgin Olive Oil at SATP"
+    },
+    "evoo_532_data.csv": {
+        "wavelength": 532e-9,
+        "setup_length": 0.052,
+        "notes": "Extra Virgin Olive Oil at SATP with green laser (532 nm)"
     }
-]
+}
