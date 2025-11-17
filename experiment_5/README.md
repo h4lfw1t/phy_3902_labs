@@ -10,3 +10,7 @@
     - Print calculated center fringe position to console
     - Print calculated distance between fringes to console
     - Print calculated angles to console
+
+- Cuvette info (the bad one):
+  - wall thickness: 1.00 mm
+  - width: 10.00 mm
