@@ -1,10 +1,10 @@
 import json
-import os
-import sys
-import matplotlib.pyplot as plt
-import pandas as pd
-from dataclasses import dataclass
 from utils import DataProcessing, FringeAnalysis
+from dataclasses import dataclass
+import pandas as pd
+import matplotlib.pyplot as plt
+import sys
+import os
 
 
 @dataclass
@@ -37,58 +37,55 @@ CONSTANTS = IntensityConfig()
 data_proc = DataProcessing()
 
 
-fringe_analyzer = FringeAnalysis(
-    fringe_min_width=IntensityConfig.FRINGE_MIN_WIDTH)
-
-
 def plot_intensity(data_file, output_file, manifest):
-    # Read the data from CSV file
-    data_path = os.path.join(CONSTANTS.DATA_DIR, data_file)
     output_file = os.path.join(CONSTANTS.OUT_DIR, output_file)
+    data_path = os.path.join(CONSTANTS.DATA_DIR, data_file)
+    if not os.path.exists(data_path):
+        print(f"{YELLOW}Warning: Data file not found: {data_file}{RESET}")
+        return
     data = pd.read_csv(data_path)
     manifest_entry = manifest.get(data_file, {})
     if not manifest_entry:
         print(f"{YELLOW}Warning: No manifest entry found for {data_file}.{RESET}")
         return
 
-    # Extract relevant information from the manifest entry
-    vacuum_wavelength = manifest_entry.get("wavelength", 650e-9)
-    setup_length = manifest_entry.get("setup_length", 0.045)
-    notes = manifest_entry.get("notes", "")
+    analyzer = FringeAnalysis(
+        fringe_min_width=IntensityConfig.FRINGE_MIN_WIDTH)
+    analyzer.analyze(data, manifest_entry, data_proc, CONSTANTS)
 
-    # Extract position and intensity columns
-    position = data_proc.steps_to_linear_position(
-        data['position'], max_steps=1800, linear_scale=0.05)
-    intensity, intensity_error = data_proc.intensity_with_error(
-        data['ldr_mean'],
-        data['ldr_stddev']
-    )
-
-    # Detect center and outer fringes
-    center_fringe_regions = fringe_analyzer.find_fringe_regions(
-        intensity, threshold=CONSTANTS.CENTER_FRINGE_THRESHOLD,)
-    outer_fringe_regions = fringe_analyzer.find_fringe_regions(
-        intensity, threshold=CONSTANTS.OUTER_FRINGE_THRESHOLD,)
-
-    # Filter overlapping regions
-    def is_outside(center, outer):
-        for c_start, c_end in center:
-            if not (outer[1] < c_start or outer[0] > c_end):
-                return False
-        return True
-    filtered_outer = [r for r in outer_fringe_regions if is_outside(
-        center_fringe_regions, r)]
-
-    # Align position so center fringe is at 0
-    if center_fringe_regions:
-        position = data_proc.align_center_fringe(
-            position, center_fringe_regions[0])
+    baseline_info = manifest_entry.get("baseline", None)
+    is_baseline = False
+    parent_baseline_name = None
+    baseline_analyzer = None
+    if baseline_info:
+        parent_baseline_name = baseline_info.get("name")
+        is_baseline = baseline_info.get("parent", False)
+        if not is_baseline:
+            # Find parent baseline file in manifest
+            parent_file = None
+            for fname, entry in manifest.items():
+                binfo = entry.get("baseline", {})
+                if binfo.get("name") == parent_baseline_name and binfo.get("parent", False):
+                    parent_file = fname
+                    break
+            if parent_file:
+                baseline_data_path = os.path.join(
+                    CONSTANTS.DATA_DIR, parent_file)
+                if os.path.exists(baseline_data_path):
+                    baseline_data = pd.read_csv(baseline_data_path)
+                    baseline_manifest_entry = manifest.get(parent_file, {})
+                    baseline_analyzer = FringeAnalysis(
+                        fringe_min_width=IntensityConfig.FRINGE_MIN_WIDTH)
+                    baseline_analyzer.analyze(
+                        baseline_data, baseline_manifest_entry, data_proc, CONSTANTS)
+                    analyzer.analyze_baseline_child(
+                        baseline_analyzer, analyzer, manifest_entry, CONSTANTS)
 
     plt.figure(figsize=(10, 6))
     plt.errorbar(
-        position,
-        intensity,
-        yerr=intensity_error,
+        analyzer.position,
+        analyzer.intensity,
+        yerr=analyzer.intensity_error,
         label="LDR Feedback",
         color='magenta',
         markersize=2,
@@ -98,60 +95,18 @@ def plot_intensity(data_file, output_file, manifest):
         capsize=2,
     )
 
-    # Highlight fringe regions
-    fringe_regions = center_fringe_regions + filtered_outer
+    fringe_regions = analyzer.center_fringe_regions + analyzer.filtered_outer
     for start_idx, end_idx in fringe_regions:
         plt.axvspan(
-            position[start_idx],
-            position[end_idx],
+            analyzer.position[start_idx],
+            analyzer.position[end_idx],
             color='yellow',
             alpha=0.3,
             label='Fringe Region' if start_idx == fringe_regions[0][0] else None,
         )
 
-    # Fringe numbering and analysis
-    fringe_numbered = fringe_analyzer.assign_fringe_numbers(
-        position, center_fringe_regions[0], filtered_outer) if center_fringe_regions else []
-
-    # Use get_fringe_distance for all outer fringes
-    fringe_distances = []
-    refractive_indices = []
-    wavelengths = []
-    if center_fringe_regions:
-        fringe_distances = data_proc.get_fringe_distance(
-            position,
-            center_fringe_regions[0],
-            [region for _, region in fringe_numbered],
-        )
-        for (num, _), fringe_distance in zip(fringe_numbered, fringe_distances):
-            wl = data_proc.calculate_wavelength(
-                abs(num),
-                fringe_distance,
-                1 / CONSTANTS.DIFFRACTION_GRATING,
-                setup_length=setup_length,
-            )
-            n = data_proc.calculate_refractive_index(
-                fringe_distance,
-                1 / CONSTANTS.DIFFRACTION_GRATING,
-                vacuum_wavelength,
-                setup_length=setup_length,
-            )
-            wavelengths.append(wl * 1e9)  # Convert to nm for summary
-            refractive_indices.append(n)
-
-    # Consolidated summary print
-    summary = fringe_analyzer.summarize_fringe_analysis(
-        position,
-        center_fringe_regions,
-        filtered_outer,
-        fringe_numbered,
-        fringe_distances,
-        wavelengths,
-        refractive_indices,
-        vacuum_wavelength
-    )
-    print(
-        f"{CYAN}--- Intensity Plot Summary for {data_file} ---{RESET}\nNotes: {notes}\n{summary}\n")
+    summary = analyzer.summarize_fringe_analysis()
+    print(f"{CYAN}--- Intensity Plot Summary for {data_file} ---{RESET}\nNotes: {analyzer.notes}\n{summary}\n")
 
     plt.title('LDR Feedback vs Position')
     plt.xlabel('Position (m)')

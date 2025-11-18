@@ -23,7 +23,7 @@ class DataProcessing:
 
     def intensity_with_error(self, adc_values, adc_stddev):
         """Return intensity and propagated error from ADC values and stddev."""
-        adc = sp.Symbol('adc')
+        adc = sp.Symbol("adc")
         v_ldr = adc * self.v_in / self.resolution
         r_ldr = (self.r_series * v_ldr) / (self.v_in - v_ldr)
         intensity_expr = 1 / r_ldr
@@ -37,7 +37,8 @@ class DataProcessing:
             values = {adc: val}
             uncertainties = {adc: std}
             err = ErrorPropagation.propagate_error(
-                intensity_expr, [adc], values, uncertainties)
+                intensity_expr, [adc], values, uncertainties
+            )
             intensity_errors.append(err)
         return intensities, intensity_errors
 
@@ -51,7 +52,9 @@ class DataProcessing:
         center_pos = position[center_idx]
         return position - center_pos
 
-    def get_fringe_distance(self, position, center_fringe_region, outer_fringe_regions):
+    def get_fringe_distance(
+        self, position, center_fringe_region, outer_fringe_regions
+    ):
         """Calculate distance between center and outer fringes."""
         center_idx = (center_fringe_region[0] + center_fringe_region[1]) // 2
         center_pos = position[center_idx]
@@ -67,13 +70,73 @@ class DataProcessing:
         """Calculate angle based on fringe distance and experimental setup."""
         return np.arctan(fringe_distance / setup_length)
 
-    def calculate_wavelength(self, fringe_number, fringe_distance, spacing, setup_length):
+    def calculate_wavelength(
+        self, fringe_number, fringe_distance, spacing, setup_length
+    ):
         """Calculate wavelength using fringe data and experimental parameters."""
         angle = self.__calculate_angle(fringe_distance, setup_length)
         wavelength = (spacing * np.sin(angle)) / fringe_number
         return wavelength
 
-    def calculate_refractive_index(self, fringe_distance, spacing, wavelength, setup_length):
+    def calculate_refractive_index(
+        self, fringe_distance, spacing, wavelength, setup_length
+    ):
         angle = self.__calculate_angle(fringe_distance, setup_length)
         n = (spacing * np.sin(angle)) / wavelength
+        return n
+
+    def calculate_refractive_index_from_baseline(
+        self,
+        fringe_order: int,
+        fringe_diff: float,
+        grating_period: float,
+        cell_width: float,
+        vacuum_wavelength: float,
+    ) -> float:
+        """Calculate the refractive index from baseline measurements.
+
+        Args:
+            fringe_order (int): The order of the fringe.
+            fringe_diff (float): Difference between the fringe distance with and without the sample.
+            grating_period (float): The period of the grating.
+            cell_width (float): The width of the cell.
+            vacuum_wavelength (float): The wavelength in vacuum.
+
+        Returns:
+            float: The calculated refractive index.
+        """
+        # Calculate the refractive index using the provided parameters
+        n = (
+            (fringe_order * vacuum_wavelength)
+            / grating_period
+            * np.sqrt(
+                1
+                + (
+                    np.square(cell_width)
+                    * (
+                        1
+                        - (
+                            np.square(
+                                fringe_order
+                                * vacuum_wavelength
+                                / grating_period
+                            )
+                        )
+                    )
+                )
+                / np.square(
+                    cell_width
+                    * fringe_order
+                    * vacuum_wavelength
+                    / grating_period
+                    - fringe_diff
+                    * np.sqrt(
+                        1
+                        - np.square(
+                            fringe_order * vacuum_wavelength / grating_period
+                        )
+                    )
+                )
+            )
+        )
         return n
