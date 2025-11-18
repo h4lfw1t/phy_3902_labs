@@ -85,7 +85,7 @@ class FringeAnalysis:
         from .data_processing import DataProcessing
         data_proc = DataProcessing()
         grating_period = 1 / constants.DIFFRACTION_GRATING
-        cell_width = manifest_entry.get("setup_length", 0.05)
+        cell_width = constants.CUVETTE_WIDTH
         vacuum_wavelength = manifest_entry.get("wavelength", 650e-9)
         # Use fringe numbers from child
         fringe_orders = [abs(num) for num, _ in child_analyzer.fringe_numbered]

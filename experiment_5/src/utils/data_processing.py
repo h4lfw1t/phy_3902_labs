@@ -93,50 +93,22 @@ class DataProcessing:
         cell_width: float,
         vacuum_wavelength: float,
     ) -> float:
-        """Calculate the refractive index from baseline measurements.
+        """Calculate the refractive index from baseline measurements."""
+        m = fringe_order
+        # TODO: Fringe diff is being calculated wrong
+        delta_d_m = fringe_diff
+        S = grating_period
+        w = cell_width
+        lambda_0 = vacuum_wavelength
 
-        Args:
-            fringe_order (int): The order of the fringe.
-            fringe_diff (float): Difference between the fringe distance with and without the sample.
-            grating_period (float): The period of the grating.
-            cell_width (float): The width of the cell.
-            vacuum_wavelength (float): The wavelength in vacuum.
+        # delta_d_m = 0.02-0.0188889
+        # S = 1 / 527558
+        # w = 0.01
+        # lambda_0 = 650e-9
 
-        Returns:
-            float: The calculated refractive index.
-        """
-        # Calculate the refractive index using the provided parameters
-        n = (
-            (fringe_order * vacuum_wavelength)
-            / grating_period
-            * np.sqrt(
-                1
-                + (
-                    np.square(cell_width)
-                    * (
-                        1
-                        - (
-                            np.square(
-                                fringe_order
-                                * vacuum_wavelength
-                                / grating_period
-                            )
-                        )
-                    )
-                )
-                / np.square(
-                    cell_width
-                    * fringe_order
-                    * vacuum_wavelength
-                    / grating_period
-                    - fringe_diff
-                    * np.sqrt(
-                        1
-                        - np.square(
-                            fringe_order * vacuum_wavelength / grating_period
-                        )
-                    )
-                )
-            )
-        )
+        term = 1 - (m**2 * lambda_0**2) / S**2
+        numerator = w**2 * term
+        denominator = (w * m * lambda_0 / S - delta_d_m * np.sqrt(term))**2
+
+        n = (m * lambda_0 / S) * np.sqrt(1 + numerator / denominator)
         return n

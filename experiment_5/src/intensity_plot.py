@@ -24,6 +24,7 @@ class IntensityConfig:
     FRINGE_MIN_WIDTH: int = 10
     CENTER_FRINGE_THRESHOLD: float = 0.1    # Threshold for center fringe detection
     OUTER_FRINGE_THRESHOLD: float = 0.0025   # Threshold for outer fringe detection
+    CUVETTE_WIDTH: float = 0.01          # Cuvette width in meters
 
 
 CYAN = '\033[96m'
