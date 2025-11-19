@@ -95,16 +95,10 @@ class DataProcessing:
     ) -> float:
         """Calculate the refractive index from baseline measurements."""
         m = fringe_order
-        # TODO: Fringe diff is being calculated wrong
         delta_d_m = fringe_diff
         S = grating_period
         w = cell_width
         lambda_0 = vacuum_wavelength
-
-        # delta_d_m = 0.02-0.0188889
-        # S = 1 / 527558
-        # w = 0.01
-        # lambda_0 = 650e-9
 
         term = 1 - (m**2 * lambda_0**2) / S**2
         numerator = w**2 * term

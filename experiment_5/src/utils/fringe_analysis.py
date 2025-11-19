@@ -87,22 +87,28 @@ class FringeAnalysis:
         grating_period = 1 / constants.DIFFRACTION_GRATING
         cell_width = constants.CUVETTE_WIDTH
         vacuum_wavelength = manifest_entry.get("wavelength", 650e-9)
-        # Use fringe numbers from child
-        fringe_orders = [abs(num) for num, _ in child_analyzer.fringe_numbered]
-        baseline_distances = baseline_analyzer.fringe_distances
-        child_distances = child_analyzer.fringe_distances
+
+        # Build dictionaries mapping fringe number to distance for both baseline and child
+        baseline_fringe_dict = {num: dist for (num, _), dist in zip(baseline_analyzer.fringe_numbered, baseline_analyzer.fringe_distances)}
+        child_fringe_dict = {num: dist for (num, _), dist in zip(child_analyzer.fringe_numbered, child_analyzer.fringe_distances)}
+
         self.child_refractive_indices = []
-        if baseline_distances and child_distances and fringe_orders:
-            for i in range(min(len(baseline_distances), len(child_distances), len(fringe_orders))):
-                fringe_diff = child_distances[i] - baseline_distances[i]
-                n = data_proc.calculate_refractive_index_from_baseline(
-                    fringe_order=fringe_orders[i],
-                    fringe_diff=fringe_diff,
-                    grating_period=grating_period,
-                    cell_width=cell_width,
-                    vacuum_wavelength=vacuum_wavelength
-                )
-                self.child_refractive_indices.append(n)
+        # Find common fringe orders between baseline and child
+        common_fringe_numbers = set(baseline_fringe_dict.keys()) & set(child_fringe_dict.keys())
+
+        for fringe_num in sorted(common_fringe_numbers):
+            baseline_dist = baseline_fringe_dict[fringe_num]
+            child_dist = child_fringe_dict[fringe_num]
+            fringe_diff = baseline_dist - child_dist
+
+            n = data_proc.calculate_refractive_index_from_baseline(
+                fringe_order=abs(fringe_num),
+                fringe_diff=fringe_diff,
+                grating_period=grating_period,
+                cell_width=cell_width,
+                vacuum_wavelength=vacuum_wavelength
+            )
+            self.child_refractive_indices.append(n)
 
     def find_fringe_regions(self, intensity, threshold=0.1):
         background = np.median(intensity)
