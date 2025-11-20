@@ -2,6 +2,10 @@
     "air_data.csv": {
         "wavelength": 650e-9,
         "setup_length": 0.045,
+        "baseline": {
+            "name": "cuvette",
+            "parent": false
+        },
         "notes": "Air at SATP"
     },
     "cuvette_data.csv": {
@@ -46,11 +50,6 @@
         "setup_length": 0.045,
         "notes": "Ethanol at SATP with green laser (532 nm)"
     },
-    "air_v2.csv": {
-        "wavelength": 650e-9,
-        "setup_length": 0.0525,
-        "notes": "Air at SATP with dark box"
-    },
     "evoo_data.csv": {
         "wavelength": 650e-9,
         "setup_length": 0.037,
@@ -86,16 +85,28 @@
     "ethanol_v2_532_data.csv": {
         "wavelength": 532e-9,
         "setup_length": 0.05,
+        "baseline": {
+            "name": "new_cuvette_532",
+            "parent": false
+        },
         "notes": "Ethanol at SATP with new cuvette and green laser (532 nm)."
     },
     "new_cuvette_532_data.csv": {
         "wavelength": 532e-9,
         "setup_length": 0.05,
+        "baseline": {
+            "name": "new_cuvette_532",
+            "parent": true
+        },
         "notes": "New cuvette with known refractive index and green laser (532 nm)."
     },
     "water_v2_532_data.csv": {
         "wavelength": 532e-9,
         "setup_length": 0.05,
+        "baseline": {
+            "name": "new_cuvette_532",
+            "parent": false
+        },
         "notes": "Tap water at SATP with new cuvette and green laser (532 nm)."
     },
     "water_v2_data.csv": {
@@ -119,6 +130,10 @@
     "evoo_v2_532_data.csv": {
         "wavelength": 532e-9,
         "setup_length": 0.05,
+        "baseline": {
+            "name": "new_cuvette_532",
+            "parent": false
+        },
         "notes": "Extra Virgin Olive Oil at SATP with new cuvette and green laser (532 nm)."
     }
 }
