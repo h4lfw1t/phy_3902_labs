@@ -19,6 +19,10 @@ Enable debug mode for detailed output:
     python intensity_plot.py auto debug
     python intensity_plot.py filename.csv debug
 
+Skip displaying graphs (still saves them):
+    python intensity_plot.py auto --no-show
+    python intensity_plot.py filename.csv --no-show
+
 Features
 --------
 - Automatic fringe detection and numbering
@@ -27,6 +31,7 @@ Features
 - Color-coded console output
 - Debug mode with detailed fringe information
 - Smart filtering (skips parent baselines in normal auto mode)
+- Optional graph display control (--no-show flag)
 """
 import json
 from typing import Optional
@@ -45,7 +50,7 @@ CONSTANTS = IntensityConfig()
 
 
 def plot_intensity(
-    data_file: str, output_file: str, manifest: dict, debug: bool = False
+    data_file: str, output_file: str, manifest: dict, debug: bool = False, show_plot: bool = True
 ):
     """
     Plot intensity data with fringe analysis and optional baseline comparison.
@@ -64,6 +69,8 @@ def plot_intensity(
         Manifest dictionary containing metadata for all datasets
     debug : bool, optional
         If True, print detailed debug information, by default False
+    show_plot : bool, optional
+        If True, display the plot window, by default True
     """
     output_file = os.path.join(CONSTANTS.OUT_DIR, output_file)
     data_path = os.path.join(CONSTANTS.DATA_DIR, data_file)
@@ -103,7 +110,7 @@ def plot_intensity(
                     )
 
     # Generate plot
-    _create_plot(analyzer, data_file)
+    _create_plot(analyzer, data_file, show_plot)
 
     # Print colorized summary
     _print_summary(analyzer, data_file, debug)
@@ -168,7 +175,7 @@ def _analyze_baseline(
     return baseline_analyzer
 
 
-def _create_plot(analyzer: FringeAnalysis, data_file: str):
+def _create_plot(analyzer: FringeAnalysis, data_file: str, show_plot: bool = True):
     """Create and save the intensity plot.
 
     Generates a matplotlib figure showing intensity vs position with
@@ -180,6 +187,8 @@ def _create_plot(analyzer: FringeAnalysis, data_file: str):
         Analyzer instance containing processed fringe data
     data_file : str
         Name of the data file (used for output filename)
+    show_plot : bool, optional
+        If True, display the plot window, by default True
     """
     plt.figure(figsize=(10, 6))
 
@@ -220,7 +229,8 @@ def _create_plot(analyzer: FringeAnalysis, data_file: str):
     )
     os.makedirs(CONSTANTS.OUT_DIR, exist_ok=True)
     plt.savefig(output_file)
-    plt.show()
+    if show_plot:
+        plt.show()
     plt.close()
 
 
@@ -310,13 +320,18 @@ if __name__ == "__main__":
     # Parse command line arguments
     auto_mode = False
     debug_mode = False
+    show_plots = True
     target_file = None
 
-    # Check for debug flag
+    # Check for debug and no-show flags
     args = [arg.lower() for arg in sys.argv[1:]]
     if "debug" in args:
         debug_mode = True
         args = [arg for arg in args if arg != "debug"]
+
+    if "--no-show" in args:
+        show_plots = False
+        args = [arg for arg in args if arg != "--no-show"]
 
     if len(args) > 0:
         if "auto" in args:
@@ -324,8 +339,8 @@ if __name__ == "__main__":
         else:
             target_file = (
                 sys.argv[1]
-                if sys.argv[1].lower() != "debug"
-                else (sys.argv[2] if len(sys.argv) > 2 else None)
+                if sys.argv[1].lower() not in ["debug", "--no-show"]
+                else (sys.argv[2] if len(sys.argv) > 2 and sys.argv[2].lower() not in ["debug", "--no-show"] else (sys.argv[3] if len(sys.argv) > 3 else None))
             )
     else:
         # Interactive mode
@@ -391,14 +406,14 @@ if __name__ == "__main__":
                     continue
 
             output_file = os.path.splitext(fname)[0] + "_intensity.png"
-            plot_intensity(fname, output_file, manifest, debug=debug_mode)
+            plot_intensity(fname, output_file, manifest, debug=debug_mode, show_plot=show_plots)
     else:
         if target_file:
             output_file = os.path.splitext(target_file)[0] + "_intensity.png"
             if debug_mode:
                 print(f"{Fore.YELLOW}Debug mode: ON")
             plot_intensity(
-                target_file, output_file, manifest, debug=debug_mode
+                target_file, output_file, manifest, debug=debug_mode, show_plot=show_plots
             )
         else:
             print(f"{Fore.RED}Error: No file specified")
