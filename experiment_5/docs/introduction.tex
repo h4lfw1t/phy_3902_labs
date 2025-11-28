@@ -1,29 +1,120 @@
-When monochromatic light passes through a medium, many methods of diffraction can be used to determine the angle at which the beam propagates using Snell's law, discovered by Willebrord Snell in 1621, before being published by René Descartes, who discovered it independently in 1637. The theory of diffraction describes the way waves bend and spread around an obstacle or through an opening without any change in energy due to the interference of the waves which was first coined by Francesco Grimaldi in 1660. The degree of this contortion is dependent on how comparable the size the opening or obstacle is relative to the wavelength. A simple experiment to analyze the wave properties of light is performed by passing a beam through a diffraction grating with slits that are comparable in width to the wavelength of the light being analyzed. They let a small portion of the light through and the interference pattern can be observed on a screen some distance away from the grating. The grating splits the beam of light into its constituent wavelengths which propagate and interfere with each other either constructively or destructively creating an even, exponential, decreasing, sinusoidal pattern centered on the normal of the grating on the plane of incidence. This interference creates bands of light on the screen where the waves interfere constructively, broken up by dark spots where the interference is destructive. The 0th order is the undeviated beam where the maximum transmission intensity is observed. The intensities of subsequent orders of fringes can be normalized to this maximum intensity producing a standardized equation for theoretically determining the diffraction pattern for all beams and wavelengths.
+When monochromatic light passes through a diffraction grating, it
+splits into a characteristic pattern of bright and dark fringes due to
+wave interference.
+Diffraction, first described by Francesco Grimaldi in 1660, is the
+phenomenon where waves bend and spread around obstacles or through
+apertures.
+The extent of this bending depends on the ratio of the wavelength to
+the size of the opening.
 
-Figure 1: The graph of the normalized intensity at the screen as a function of the fringe number and a visual representation of the diffraction inteference pattern on the screen (?)
-https://www.iitianacademy.com/ib-dp-physics-9-2-single-slit-diffraction-question-bank-hl-paper-1 (Q1) ,
-https://www.researchgate.net/figure/Single-slit-diffraction-pattern-of-particles-In-the-process-of-light-propagation-when\_fig5\_351288282
+A diffraction grating consists of many parallel slits with spacing
+comparable to the wavelength of light.
+When light passes through these slits, the emerging waves interfere
+with each other, creating a pattern of constructive and destructive
+interference.
+Constructive interference produces bright fringes (maxima), while
+destructive interference creates dark regions (minima).
+The central, undeviated beam is the zeroth-order maximum, and
+subsequent symmetrically spaced fringes are the higher-order maxima.
 
-In order for constructive interference to occur, the path difference between the waves at adjacent slits in the diffraction grating will be an integer multiple of the wavelength $\lambda$. This is when both waves have the same phase. The path difference between these waves creates a right-angle triangle with the spacing of the grating $d$ as the hypotenuse and one side equal to the path difference. The sinusoidal relationship between the hypotenuse and the opposite side of a right-angle triangle signifies that the angle $\theta$ between any band or fringe with the fringe number $m$ and the center or 0th order fringe can be given by the following equation
-\[\theta_{air} = \arcsin (\frac{m \lambda}{d}).\tag{1}\]
-The refractive index of a medium refers to the ratio of the speed of light in a vacuum $c$ to the speed of light in that specific medium $v$, however, for a linear medium this index depends on the density meaning it can be altered by a number of factors including temperature and pressure. Fortunately, assuming the frequency of the relatively low intensity beam will remain constant as it is dependent on the source of the light rather than the medium in which it travels allows for the equations for speed of light in a vacuum,
-\[ c = f \lambda_0, \tag{2}\]
-and the speed of light in a certain medium
-\[ v = f \lambda, \tag{3}\]
-to be solved for frequency and set equal to one another. This produces an equation for the wavelength of a beam in a medium that is directly proportional to its wavelength in a vacuum;
-\[ \frac{c}{\lambda_0} = \frac{v}{\lambda} \text{    or    } \lambda = \frac{\lambda_0}{n}, \tag{4}\]
-with a proportionality constant of $n = \frac{c}{v}$. Equation (2) can be used in conjunction with equation (4) to produce the following formula to determine the index of refraction of a material under any conditions
-\[n = \frac{\lambda_0 m}{d \sin(\theta)}. \tag{5}\]
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{../out/intensity_plots/air_v2_intensity}
+\caption{Typical diffraction pattern intensity profile measured through
+air using the 650~nm laser.
+The central peak (zeroth order) shows maximum intensity with symmetric
+first-order fringes on either side, demonstrating the characteristic
+diffraction pattern produced by the grating.}
+\label{fig:diffraction_pattern_intro}
+\end{figure}
 
-This is an acceptable formula to use for determining the index based on the diffraction pattern effects of one medium, or in this case, if there was only one medium between the diffraction grating and the LDR. However, the setup and materials available had limitations, because equation (1) only applies in the medium the diffraction grating is in which for this experiment is air as the grating could not be submerged. To account for this, any distance greater than 1mm must be factored in to avoid a significant error in the calculation of the liquid's index of refraction as any air gaps will introduce a lateral shift larger than the liquid contribution. The distance the beam travels within each medium must be taken into account. Snell's law,
-\[n_1 \sin(\theta)_1 = n_2 \sin(\theta)_2 \tag{6} \]
-can be used across each interface to determine a relationship between the incident beam and the final exit angle $\theta_{out}$ measured at the screen, if the beam incident on the grating is aligned normal to it, this simplifies the calculation. As the beam passes through the medium, the change in the speed of light within the medium will bend it towards the normal if it is more refractive than air and away from the normal if it is less refractive. This bending will shift the location of the maxima at the screen by $\Delta x$, the relative displacement of each order fringe is necessary for determining the speed of light in the medium which is inversely proportional to its refractive index. If a fringe $i$ is at position $x$ then using the geometry of the beam path one can find
-\[ x_i = p \tan (\theta_i), \tag{7}\]
-where $p$ is the path length the beam travels in each medium and $\theta$ is the displacement angle from the normal of the $i^{th}$ order fringes which should be equidistant from the normal. This equation is required to combine the impacts of the two mediums, or, the displacement of the $i^{th}$ order fringe can be determined by taking the difference
-\[ \Delta x = p \sin( \theta_{\text{air}} ) \left( \frac{1}{ \sqrt{1 - \sin^2 ( \theta_{\text{air}} ) }} + \frac{1}{ \sqrt{n_{liq}^2 - \sin^2 ( \theta_{\text{air}} ) }})\right) \tag{8},\]
-where the factor $p$ accounts for the liquid path length. This equation is not suitable for a third index nor if the beam is incident on the grating at an angle to the normal but can be modified further to account for multiple linear media and an incident angle. Through some aggressive simplification, this equation can be solved for the index of refraction giving a final formula for a very simple experiment
-\[ n = \sin \left( \theta_{ \text{air}} \right) \sqrt{ 1 +  \frac{p^2 \left( 1 - \sin^2 \left( \theta_{ \text{air}} \right) \right) }{ \left( p \sin \left( \theta_{ \text{air}} \right) - \Delta x \sqrt{ 1 - \sin^2 \left( \theta_{ \text{air}} \right)} \right) ^2}}. \tag{9}\]
-There is no need for the effect of the walls of the vessel for the liquid to be included in equation (8) as, in this case, only the displacement from its position of the maxima with only the empty cuvette compared to the filled cuvette was used to determine the effective shift. Conversely, if the refractive index of the substance in the cuvette is calculated, the wavelength of the light in the fluid can be calculated with a simple combination of equations (4) and (9) which produces the following,
-\[ \lambda = \frac{d}{m \sqrt{ 1 +  \frac{p^2 \left( 1 - \sin^2 \left( \theta_{ \text{air}} \right) \right) }{ \left( p \sin \left( \theta_{ \text{air}} \right) - \Delta x \sqrt{ 1 - \sin^2 \left( \theta_{ \text{air}} \right)} \right) ^2}}}. \tag{10}\]
-This effect can be observed primarily in media with high-refractive indices as the change in wavelength may be visible. The goal for this experiment is to determine a very cost effective way to calculate the refractive indices of liquids.
+Constructive interference occurs when the path difference between waves
+from adjacent slits is an integer multiple ($m$) of the wavelength
+($\lambda$).
+For a diffraction grating with slit spacing $d$, this path difference
+forms the opposite side of a right triangle where $d$ is the
+hypotenuse.
+The angle $\theta$ of the $m^{\text{th}}$-order fringe relative to the
+normal is given by:
+\[\theta_{air} = \arcsin \left(\frac{m \lambda}{d}\right)\tag{1}\]
+
+The refractive index of a medium is defined as the ratio of the speed
+of light in a vacuum ($c$) to the speed of light in that medium ($v$).
+For linear media, this index depends on optical density and can be
+affected by factors such as temperature and pressure.
+Since the frequency ($f$) of light remains constant as it propagates
+through different media (being determined by the source), we can relate
+the wavelength in vacuum ($\lambda_0$) to the wavelength in a medium
+($\lambda$).
+
+Starting with the fundamental relationship $c = f \lambda_0$ for light
+in vacuum and $v = f \lambda$ for light in a medium, we can solve for
+frequency and equate them:
+\[\frac{c}{\lambda_0} = \frac{v}{\lambda}\tag{2}\]
+
+This yields the relationship between wavelength and refractive index:
+\[\lambda = \frac{\lambda_0}{n} \quad \text{where} \quad n = \frac{c}{v}\tag{3}\]
+
+Combining this with the grating equation allows us to determine the
+refractive index from the diffraction angle:
+\[n = \frac{\lambda_0 m}{d \sin(\theta)}\tag{4}\]
+
+This formula is valid when light travels through a single uniform
+medium.
+However, in this experiment, the diffraction grating remains in air
+while the diffracted light passes through a liquid-filled cuvette
+before reaching the detector.
+This multi-medium optical path requires a more detailed analysis.
+
+Since the grating cannot be submerged, it remains in air
+($n_{air} \approx 1$), and equation (1) determines the initial
+diffraction angle in air.
+The light then enters the liquid medium, where it refracts according to
+Snell's law:
+\[n_1 \sin(\theta_1) = n_2 \sin(\theta_2)\tag{5}\]
+
+As the beam passes through the liquid, refraction bends it toward the
+normal if the liquid is more optically dense than air, or away from the
+normal if less dense.
+This refraction causes a lateral displacement ($\Delta x$) of the
+fringe position at the detector.
+For accurate measurements, any air gap greater than 1~mm between the
+grating and the liquid must be accounted for, as such gaps introduce
+significant systematic errors.
+
+The lateral displacement of a fringe depends on the path length through
+each medium and the refractive indices involved.
+For a fringe at position $x_i$, the geometry of the beam path gives:
+\[x_i = p \tan(\theta_i)\tag{6}\]
+where $p$ is the path length and $\theta_i$ is the propagation angle in
+that medium.
+
+For the two-medium system (air and liquid) with the beam initially
+normal to the grating, the displacement of the $i^{\text{th}}$-order
+fringe can be expressed as:
+\[\Delta x = p \sin(\theta_{\text{air}}) \left(\frac{1}{\sqrt{1 - \sin^2(\theta_{\text{air}})}} - \frac{1}{\sqrt{n_{liq}^2 - \sin^2(\theta_{\text{air}})}}\right)\tag{7}\]
+where $p$ is the liquid path length.
+This equation assumes normal incidence on the grating and parallel
+cuvette walls, and is not suitable for more than two media or
+non-normal incidence without modification.
+
+Solving equation (7) for the refractive index yields:
+\[n_{liq} = \sin(\theta_{\text{air}}) \sqrt{1 + \frac{p^2 (1 - \sin^2(\theta_{\text{air}}))}{(p \sin(\theta_{\text{air}}) - \Delta x \sqrt{1 - \sin^2(\theta_{\text{air}})})^2}}\tag{8}\]
+
+By measuring the fringe positions with an empty cuvette (baseline) and
+comparing them to the positions with the filled cuvette, the effective
+displacement $\Delta x$ can be determined.
+This approach eliminates the need to account for the optical effects of
+the cuvette walls, as they are present in both measurements and cancel
+out when calculating the displacement.
+
+Once the refractive index is determined, the wavelength of light in the
+liquid can be calculated by combining equations (3) and (8):
+\[\lambda_{liq} = \frac{d}{m \sqrt{1 + \frac{p^2 (1 - \sin^2(\theta_{\text{air}}))}{(p \sin(\theta_{\text{air}}) - \Delta x \sqrt{1 - \sin^2(\theta_{\text{air}})})^2}}}\tag{9}\]
+
+This wavelength shift is most noticeable in materials with high
+refractive indices.
+The goal of this experiment is to validate this cost-effective
+diffraction-based method for measuring the refractive indices of common
+liquids.
 

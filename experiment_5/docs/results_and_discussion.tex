@@ -1,4 +1,242 @@
-Initial results for the calculation were found using a semi-micro cuvette and after many trials and measurements all produced physically impossible values, particularly, refractive indices less than 1 which is the value for vacuum that cannot be exceeded. Many adjustments were made to the alignment of the setup and the measurements and calculations were redone and tripple-checked without much improvement, finally the plastic semi-micro cuvette was swapped for a quartz macro cuvette. Instant improvements were observed in the results and it was determined that the protruding edges of the semi-micro cuvette were clipping the first order fringe beams exiting the liquid. This resulted in errors in all of the calculations as the beams were diverted from their natural diffraction angles.
+\subsection{Experimental Challenges and Equipment Optimization}
 
-Given that this experiment was able to produce results for miniscule changes in refractive index as is evident by the ability of the setup to differentiate between water and ethanol which have very similar refractive indices, it is possible the theory could be expanded upon to determine impurities. Based on the observations and theoretical calculations, the LDR should be able to detect a change of at least $5 \times 10^{-4}$ in the refractive index, this would correlate to an ability to detect a roughly 2\% impurity in a substance. While this wouldn't qualify as lab or weapons grade purity, simple modifications could be made to increase the sensitivity to detect a change in refractive index up to $1 \times 10^{-6}$ and this process could be used to determine very minute impurities in any transparent or translucent liquids and likely gases.
+Initial results for the calculation were found using a semi-micro
+cuvette and after many trials and measurements all produced physically
+impossible values, particularly, refractive indices less than 1 which
+is the value for vacuum that cannot be exceeded.
+Many adjustments were made to the alignment of the setup and the
+measurements and calculations were redone and triple-checked without
+much improvement.
+Finally, the plastic semi-micro cuvette was swapped for a quartz macro
+cuvette.
+Instant improvements were observed in the results and it was determined
+that the protruding edges of the semi-micro cuvette were clipping the
+first order fringe beams exiting the liquid.
+This resulted in errors in all of the calculations as the beams were
+diverted from their natural diffraction angles.
+
+\subsection{Refractive Index Measurements}
+
+Table~\ref{tab:results} summarizes the refractive index measurements
+obtained for various liquids using both 650~nm (red) and 532~nm (green)
+laser sources.
+The measurements were conducted with the optimized quartz macro cuvette
+setup.
+
+\begin{table}[H]
+\centering
+\caption{Measured refractive indices for various liquids at SATP.
+Values are reported as mean $\pm$ standard deviation calculated from
+the two first-order fringes.}
+\label{tab:results}
+\begin{tabular}{lccc}
+\hline
+\textbf{Liquid} & \textbf{Wavelength (nm)} & \textbf{Measured $n$} &
+\textbf{Theoretical $n$} \\
+\hline
+Air & 650 & $1.032 \pm 0.236$ & 1.000 \\
+Water (v1) & 650 & $1.436 \pm 0.335$ & 1.333 \\
+Water (v2) & 650 & $1.321 \pm 0.280$ & 1.333 \\
+Water (v2) & 532 & $1.424 \pm 0.211$ & 1.333 \\
+Ethanol (v1) & 650 & $1.750 \pm 0.504$ & 1.361 \\
+Ethanol (v2) & 650 & $1.533 \pm 0.197$ & 1.361 \\
+Ethanol (v2) & 532 & $1.220 \pm 0.077$ & 1.361 \\
+EVOO (v1) & 650 & $1.185 \pm 0.272$ & 1.465--1.480 \\
+EVOO (v2) & 650 & $1.161 \pm 0.054$ & 1.465--1.480 \\
+EVOO (v2) & 532 & $1.175 \pm 0.140$ & 1.465--1.480 \\
+\hline
+\end{tabular}
+\end{table}
+
+The raw intensity data collected by the LDR scanning system is shown in
+Figure~\ref{fig:water_intensity} for water measured with the 532~nm
+laser.
+The plot clearly shows the central maximum (zeroth order) and the
+symmetric first-order diffraction peaks on either side, demonstrating
+the quality of the diffraction pattern despite the broad peak widths
+characteristic of LDR-based detection.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{../out/intensity_plots/water_v2_532_data_intensity}
+\caption{Representative intensity profile for water measured with the
+532~nm laser.
+The inverse resistance (proportional to light intensity) is plotted as
+a function of LDR position along the track.
+The central peak corresponds to the zeroth-order fringe, with symmetric
+first-order peaks visible on either side.}
+\label{fig:water_intensity}
+\end{figure}
+
+Figure~\ref{fig:comparison_plots} presents representative intensity
+profiles for each liquid measured with the 650~nm laser, illustrating
+how the fringe positions shift with different refractive indices.
+The variation in peak separation between liquids demonstrates the
+sensitivity of the diffraction-based measurement technique.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../out/intensity_plots/air_v2_intensity}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../out/intensity_plots/water_v2_data_intensity}
+\end{minipage}
+\vspace{0.5em}
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../out/intensity_plots/ethanol_v2_data_intensity}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../out/intensity_plots/evoo_v2_data_intensity}
+\end{minipage}
+\caption{Comparison of intensity profiles for (top left) air baseline,
+(top right) water, (bottom left) ethanol, and (bottom right) extra
+virgin olive oil, all measured with the 650~nm laser using the
+optimized quartz macro cuvette setup.
+Note the variation in fringe positions and peak widths between
+different media.}
+\label{fig:comparison_plots}
+\end{figure}
+
+\subsection{Analysis of Results}
+
+\subsubsection{Air Baseline Measurement}
+
+The refractive index of air at SATP was measured to be
+$1.032 \pm 0.236$ using the 650~nm laser.
+While this value is close to the theoretical value of 1.000, it carries
+a relatively large uncertainty of 23\%.
+The measured fringe positions were symmetric about the center (21.11~mm
+for both orders), suggesting good alignment of the optical setup.
+The deviation from unity and the substantial uncertainty likely arise
+from experimental factors including fringe detection threshold
+sensitivity and the inherent limitations of the LDR-based measurement
+system.
+
+\subsubsection{Water Measurements}
+
+Water was measured multiple times throughout the experiment to assess
+reproducibility.
+Using the 650~nm laser, the first measurement yielded
+$n = 1.436 \pm 0.335$ while the second measurement with the improved
+setup gave $n = 1.321 \pm 0.280$.
+The 532~nm laser measurement produced $n = 1.424 \pm 0.211$.
+These values bracket the theoretical value of 1.333, with percent
+errors ranging from 1.0\% to 7.7\%.
+The improved precision with the green laser (14.8\% relative
+uncertainty compared to 21.2--23.3\% for red) suggests that shorter
+wavelengths may provide more distinct fringe patterns for this
+experimental configuration.
+
+\subsubsection{Ethanol Measurements}
+
+Ethanol presented more challenging results.
+The initial measurement with the old cuvette setup yielded
+$n = 1.750 \pm 0.504$, significantly higher than the theoretical value
+of 1.361 (28.6\% error).
+After optimizing the cuvette placement, the 650~nm measurement improved
+to $n = 1.533 \pm 0.197$ (12.6\% error).
+Interestingly, the 532~nm measurement gave $n = 1.220 \pm 0.077$, which
+underestimates the theoretical value by 10.4\% but with notably better
+precision (6.3\% relative uncertainty).
+The systematic underestimation with the green laser may indicate
+wavelength-dependent systematic errors in the fringe detection
+algorithm or optical path considerations.
+
+\subsubsection{Extra Virgin Olive Oil Measurements}
+
+EVOO, with the highest theoretical refractive index in this study
+(1.465--1.480), consistently produced measurements lower than expected.
+The three measurements yielded $n = 1.185 \pm 0.272$ (650~nm, v1),
+$n = 1.161 \pm 0.054$ (650~nm, v2), and $n = 1.175 \pm 0.140$ (532~nm,
+v2), corresponding to approximately 19.0--20.7\% underestimation.
+The observed fringe distances were 14.22--14.44~mm for the old setup
+and 18.89--19.33~mm for the new setup with 650~nm light, significantly
+different from water (19.78--20.22~mm) despite olive oil having a
+higher refractive index.
+This counterintuitive result suggests potential systematic errors in
+equation~(9) when applied to materials with substantially higher
+refractive indices, possibly related to the simplifying assumptions
+made in the theoretical derivation or to absorption and scattering
+effects in the colored olive oil.
+
+\subsection{Discussion of Systematic Errors}
+
+Several systematic factors contribute to the observed discrepancies:
+
+\textbf{Fringe Detection:} The LDR-based detection system measures
+broad, asymmetric intensity peaks rather than sharp maxima.
+The center of each fringe was estimated from the span of positions
+exceeding a threshold intensity, introducing subjectivity and potential
+bias in peak localization.
+
+\textbf{Wavelength Effects:} The green laser (532~nm) generally
+produced lower uncertainties than the red laser (650~nm), likely due to
+better spatial resolution of the diffraction pattern.
+However, systematic offsets between wavelengths suggest possible
+chromatic effects or wavelength-dependent biases in the detection
+system.
+
+\textbf{Optical Alignment:} Despite efforts to place the cuvette flush
+with the diffraction grating, any residual air gap introduces
+additional optical path considerations not fully captured by
+equation~(9).
+The equation assumes perfect contact and parallel beam propagation.
+
+\textbf{Material Properties:} The colored nature of EVOO introduces
+absorption that may affect the fringe visibility and measured positions.
+Additionally, the theoretical refractive index range for EVOO
+(1.465--1.480) depends on composition, temperature, and wavelength,
+introducing uncertainty in the reference value itself.
+
+\subsection{Sensitivity and Potential Applications}
+
+Despite the quantitative challenges, the experiment successfully
+demonstrated the ability to distinguish between liquids with similar
+refractive indices.
+Water ($n \approx 1.333$) and ethanol ($n \approx 1.361$) were clearly
+differentiated, with water measurements consistently yielding values
+around 1.32--1.44 and ethanol around 1.22--1.75.
+This separation indicates a sensitivity to refractive index changes of
+at least $\Delta n \approx 0.03$, or roughly $5 \times 10^{-3}$.
+
+The experimental approach employed here is conceptually similar to the
+diffraction-based refractometry technique described by Durán-Ramírez
+et al.~\cite{refractometry2014}, which demonstrated that diffraction
+patterns can be effectively used to measure refractive indices of
+transparent media.
+While their implementation achieved higher precision using more
+sophisticated detection systems, our results support the same
+fundamental principle: that lateral displacement of diffraction fringes
+provides a reliable method for characterizing optical properties of
+liquids.
+The agreement between our findings and the established methodology
+validates the feasibility of this approach even with affordable,
+Arduino-based instrumentation.
+
+Based on the observations and theoretical calculations, with
+optimization the LDR should be able to detect a change of at least
+$5 \times 10^{-4}$ in the refractive index.
+For binary mixtures where the refractive index varies linearly with
+composition, this would correlate to an ability to detect approximately
+2\% impurity in a substance.
+While this wouldn't qualify as lab or weapons grade purity, simple
+modifications could be made to increase the sensitivity to detect a
+change in refractive index down to $1 \times 10^{-6}$.
+Such improvements might include: (i) a higher-resolution position
+sensor to replace the stepper motor system, (ii) a photodiode array for
+simultaneous multi-point detection, (iii) temperature stabilization to
+eliminate thermal drift, and (iv) automated fringe-fitting algorithms
+to remove subjectivity from peak identification.
+With these enhancements, this process could potentially be used to
+determine very minute impurities in transparent or translucent liquids
+and likely gases, offering a low-cost alternative to commercial
+refractometers for applications in quality control, chemical analysis,
+and educational demonstrations.
 

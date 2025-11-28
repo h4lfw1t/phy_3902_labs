@@ -4,11 +4,29 @@ This section contains the code used in the experiment for data acquisition and a
 
 The Arduino code controls the stepper motor to move the LDR across the diffraction pattern and records intensity measurements.
 
+\subsubsection{Main Stepper Motor Control Code}
+
 \lstinputlisting[language=C++, caption={Spectrometer stepper motor control code}]{../src/spectrometer_stepper/spectrometer_stepper.ino}
+
+\subsubsection{CSV Printer Library}
+
+\lstinputlisting[language=C++, caption={CSV printer header file for data output}]{../src/spectrometer_stepper/CSVPrinter.h}
 
 \subsection{Python Code for Data Analysis}
 
 The Python code processes the intensity data and calculates the refractive indices.
 
+\subsubsection{Main Analysis Script}
+
 \lstinputlisting[language=Python, caption={Intensity plotting and analysis code}]{../src/intensity_plot.py}
+
+\subsubsection{Utility Modules}
+
+\lstinputlisting[language=Python, caption={Package initialization}]{../src/utils/__init__.py}
+
+\lstinputlisting[language=Python, caption={Data processing utilities}]{../src/utils/data_processing.py}
+
+\lstinputlisting[language=Python, caption={Fringe analysis utilities}]{../src/utils/fringe_analysis.py}
+
+\lstinputlisting[language=Python, caption={Configuration settings}]{../src/utils/intensity_config.py}
 
