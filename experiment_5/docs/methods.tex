@@ -6,10 +6,20 @@ assembly at the opposite end.
 A diffraction grating was placed between them on an adjustable stand.
 The track length was designed to capture the first-order diffraction
 peaks, calculated based on the theoretical diffraction angle for air
-using equation (1).
+using equation~\eqref{eq:diffraction_angle}.
 All light-sensitive components were enclosed in a black box to minimize
 ambient light interference and maximize the contrast between bright and
 dark fringes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{refractometry_setup_diagram}
+    \caption{Diagram of the experimental setup showing the laser source,
+    diffraction grating, cuvette, and LDR mounted on the linear
+    track. The entire assembly is enclosed in a light-tight box to reduce
+    ambient light interference.}
+    \label{fig:experimental_setup}
+\end{figure}
 
 The cuvette placement proved critical to measurement accuracy.
 Initial trials positioned the cuvette 1--2~mm from the diffraction
@@ -18,13 +28,13 @@ Analysis revealed that air gaps greater than 1~mm introduce significant
 lateral shifts that must be accounted for in the theoretical model.
 To simplify the optical path and improve accuracy, the cuvette was
 repositioned flush against the grating, eliminating the air gap and
-allowing equation (8) to be directly applicable.
+allowing equation~\eqref{eq:wavelength_refractive_index} to be directly applicable.
 
 The experimental procedure began with control measurements to validate
 the setup.
 First, the diffraction pattern was measured through air alone to verify
 that the apparatus could correctly determine the refractive index of
-air ($n \approx 1.000$).
+air \((n \approx 1.000)\).
 Next, an empty cuvette was placed flush with the grating to establish a
 baseline measurement.
 This baseline accounts for the optical effects of the quartz cuvette
@@ -64,7 +74,7 @@ limitations of the LDR sensor.
 The positions of the first-order peaks (both positive and negative
 diffraction orders) were determined from the intensity plots and
 compared to the baseline positions from the empty cuvette measurement.
-The displacement values ($\Delta x$) were then substituted into
+The displacement values \((\Delta x)\) were then substituted into
 equation (8) to calculate the refractive index of each liquid.
 The measurements were repeated with both laser wavelengths to verify
 precision and identify any systematic wavelength-dependent errors.
