@@ -1,21 +1,23 @@
 \subsection{Experimental Challenges and Equipment Optimization}
+\label{subsec:experimental-challenges-and-equipment-optimization}
 
 Initial results for the calculation were found using a semi-micro
-cuvette and after many trials and measurements all produced physically
-impossible values, particularly, refractive indices less than 1 which
-is the value for vacuum that cannot be exceeded.
+cuvette.
+After many trials and measurements, all produced results below the
+accepted minimum refractive index in vacuum of 1.000.
 Many adjustments were made to the alignment of the setup and the
-measurements and calculations were redone and triple-checked without
+measurements and calculations were redone and triple-checked, without
 much improvement.
 Finally, the plastic semi-micro cuvette was swapped for a quartz macro
 cuvette.
-Instant improvements were observed in the results and it was determined
+Instant improvements were observed in the results, and it was determined
 that the protruding edges of the semi-micro cuvette were clipping the
 first order fringe beams exiting the liquid.
-This resulted in errors in all of the calculations as the beams were
+This resulted in errors in all the calculations as the beams were
 diverted from their natural diffraction angles.
 
 \subsection{Refractive Index Measurements}
+\label{subsec:refractive-index-measurements}
 
 Table~\ref{tab:results} summarizes the refractive index measurements
 obtained for various liquids using both 650~nm (red) and 532~nm (green)
@@ -26,24 +28,26 @@ setup.
 \begin{table}[H]
 \centering
 \caption{Measured refractive indices for various liquids at SATP.
+Multiple trials were conducted for water, ethanol, and EVOO to assess
+reproducibility.
 Values are reported as mean $\pm$ standard deviation calculated from
 the two first-order fringes.}
 \label{tab:results}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \hline
-\textbf{Liquid} & \textbf{Wavelength (nm)} & \textbf{Measured $n$} &
+\textbf{Liquid} & \textbf{Trial} & \textbf{Wavelength (nm)} & \textbf{Measured $n$} &
 \textbf{Theoretical $n$} \\
 \hline
-Air & 650 & $1.032 \pm 0.236$ & 1.000 \\
-Water (v1) & 650 & $1.436 \pm 0.335$ & 1.333 \\
-Water (v2) & 650 & $1.321 \pm 0.280$ & 1.333 \\
-Water (v2) & 532 & $1.424 \pm 0.211$ & 1.333 \\
-Ethanol (v1) & 650 & $1.750 \pm 0.504$ & 1.361 \\
-Ethanol (v2) & 650 & $1.533 \pm 0.197$ & 1.361 \\
-Ethanol (v2) & 532 & $1.220 \pm 0.077$ & 1.361 \\
-EVOO (v1) & 650 & $1.185 \pm 0.272$ & 1.465--1.480 \\
-EVOO (v2) & 650 & $1.161 \pm 0.054$ & 1.465--1.480 \\
-EVOO (v2) & 532 & $1.175 \pm 0.140$ & 1.465--1.480 \\
+Air & -- & 650 & $1.032 \pm 0.236$ & 1.000 \\
+Water & 1 & 650 & $1.436 \pm 0.335$ & 1.333 \\
+Water & 2 & 650 & $1.321 \pm 0.280$ & 1.333 \\
+Water & 2 & 532 & $1.424 \pm 0.211$ & 1.333 \\
+Ethanol & 1 & 650 & $1.750 \pm 0.504$ & 1.361 \\
+Ethanol & 2 & 650 & $1.533 \pm 0.197$ & 1.361 \\
+Ethanol & 2 & 532 & $1.220 \pm 0.077$ & 1.361 \\
+EVOO & 1 & 650 & $1.185 \pm 0.272$ & 1.465--1.480 \\
+EVOO & 2 & 650 & $1.161 \pm 0.054$ & 1.465--1.480 \\
+EVOO & 2 & 532 & $1.175 \pm 0.140$ & 1.465--1.480 \\
 \hline
 \end{tabular}
 \end{table}
@@ -105,6 +109,7 @@ different media.}
 \end{figure}
 
 \subsection{Analysis of Results}
+\label{subsec:analysis-of-results}
 
 \subsubsection{Air Baseline Measurement}
 
@@ -151,8 +156,9 @@ algorithm or optical path considerations.
 
 \subsubsection{Extra Virgin Olive Oil Measurements}
 
-EVOO, with the highest theoretical refractive index in this study
-(1.465--1.480), consistently produced measurements lower than expected.
+Extra virgin olive oil (EVOO), with the highest theoretical refractive index
+in this study (1.465--1.480), consistently produced measurements lower than
+expected.
 The three measurements yielded $n = 1.185 \pm 0.272$ (650~nm, v1),
 $n = 1.161 \pm 0.054$ (650~nm, v2), and $n = 1.175 \pm 0.140$ (532~nm,
 v2), corresponding to approximately 19.0--20.7\% underestimation.
@@ -161,12 +167,13 @@ and 18.89--19.33~mm for the new setup with 650~nm light, significantly
 different from water (19.78--20.22~mm) despite olive oil having a
 higher refractive index.
 This counterintuitive result suggests potential systematic errors in
-equation~(9) when applied to materials with substantially higher
-refractive indices, possibly related to the simplifying assumptions
-made in the theoretical derivation or to absorption and scattering
-effects in the colored olive oil.
+equation~\eqref{eq:wavelength_in_liquid} when applied to materials with
+substantially higher refractive indices, possibly related to the simplifying
+assumptions made in the theoretical derivation or to absorption and scattering
+effects in the olive oil.
 
 \subsection{Discussion of Systematic Errors}
+\label{subsec:discussion-of-systematic-errors}
 
 Several systematic factors contribute to the observed discrepancies:
 
@@ -175,6 +182,8 @@ broad, asymmetric intensity peaks rather than sharp maxima.
 The center of each fringe was estimated from the span of positions
 exceeding a threshold intensity, introducing subjectivity and potential
 bias in peak localization.
+The fringes could likely be measured more accurately with a stationary
+detection system, such as a photodiode array or high-resolution camera.
 
 \textbf{Wavelength Effects:} The green laser (532~nm) generally
 produced lower uncertainties than the red laser (650~nm), likely due to
@@ -182,20 +191,17 @@ better spatial resolution of the diffraction pattern.
 However, systematic offsets between wavelengths suggest possible
 chromatic effects or wavelength-dependent biases in the detection
 system.
+To fully understand these effects, further investigation with additional
+wavelengths and more precise instrumentation would be necessary.
 
 \textbf{Optical Alignment:} Despite efforts to place the cuvette flush
 with the diffraction grating, any residual air gap introduces
 additional optical path considerations not fully captured by
-equation~(9).
+equation~\eqref{eq:wavelength_in_liquid}.
 The equation assumes perfect contact and parallel beam propagation.
 
-\textbf{Material Properties:} The colored nature of EVOO introduces
-absorption that may affect the fringe visibility and measured positions.
-Additionally, the theoretical refractive index range for EVOO
-(1.465--1.480) depends on composition, temperature, and wavelength,
-introducing uncertainty in the reference value itself.
-
 \subsection{Sensitivity and Potential Applications}
+\label{subsec:sensitivity-and-potential-applications}
 
 Despite the quantitative challenges, the experiment successfully
 demonstrated the ability to distinguish between liquids with similar
@@ -226,12 +232,12 @@ $5 \times 10^{-4}$ in the refractive index.
 For binary mixtures where the refractive index varies linearly with
 composition, this would correlate to an ability to detect approximately
 2\% impurity in a substance.
-While this wouldn't qualify as lab or weapons grade purity, simple
+While this wouldn't qualify as lab or medical grade purity, simple
 modifications could be made to increase the sensitivity to detect a
 change in refractive index down to $1 \times 10^{-6}$.
 Such improvements might include: (i) a higher-resolution position
 sensor to replace the stepper motor system, (ii) a photodiode array for
-simultaneous multi-point detection, (iii) temperature stabilization to
+simultaneous multipoint detection, (iii) temperature stabilization to
 eliminate thermal drift, and (iv) automated fringe-fitting algorithms
 to remove subjectivity from peak identification.
 With these enhancements, this process could potentially be used to
