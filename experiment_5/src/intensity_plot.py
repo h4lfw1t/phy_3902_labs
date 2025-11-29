@@ -219,7 +219,7 @@ def _create_plot(analyzer: FringeAnalysis, data_file: str, show_plot: bool = Tru
 
     plt.title("LDR Feedback vs Position")
     plt.xlabel("Position (m)")
-    plt.ylabel("LDR Value")
+    plt.ylabel("LDR Proportional Feedback")
     plt.grid(True)
     plt.legend()
 
