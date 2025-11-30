@@ -1,0 +1,43 @@
+This section contains the code used in the experiment for data acquisition and analysis.
+
+\subsection{Arduino Code for Stepper Motor and LDR Control}
+\label{subsec:arduino_code}
+
+The Arduino code controls the stepper motor to move the LDR across the diffraction pattern and records intensity measurements.
+
+\subsubsection{Main Stepper Motor Control Code}
+\label{subsubsec:main_stepper_motor_code}
+
+\lstinputlisting[language=C++,caption={Spectrometer stepper motor control code},label={lst:spectrometer_stepper}]{../src/spectrometer_stepper/spectrometer_stepper.ino}
+
+
+\subsubsection{CSV Printer Library}
+\label{subsubsec:csv_printer_library}
+
+\lstinputlisting[language=C++,caption={CSV printer header file for data output},label={lst:csv_printer}]{../src/spectrometer_stepper/CSVPrinter.h}
+
+\subsection{Python Code for Data Analysis}
+\label{subsec:python_code}
+
+The Python code processes the intensity data and calculates the refractive indices.
+
+\subsubsection{Main Analysis Script}
+\label{subsubsec:main_analysis_script}
+
+\lstinputlisting[language=Python,caption={Intensity plotting and analysis code},label={lst:intensity_plot}]{../src/intensity_plot.py}
+
+\subsubsection{Theoretical Model Script}
+\label{subsubsec:theoretical_model_script}
+
+\lstinputlisting[language=Python,caption={Theoretical intensity plotting},label={lst:theoretical_diffraction}]{../src/theoretical_diffraction.py}
+
+\subsubsection{Utility Modules}
+\label{subsubsec:utility_modules}
+
+\lstinputlisting[language=Python,caption={Package initialization},label={lst:package_init}]{../src/utils/__init__.py}
+
+\lstinputlisting[language=Python,caption={Data processing utilities},label={lst:data_processing}]{../src/utils/data_processing.py}
+
+\lstinputlisting[language=Python,caption={Fringe analysis utilities},label={lst:fringe_analysis}]{../src/utils/fringe_analysis.py}
+
+\lstinputlisting[language=Python,caption={Configuration settings},label={lst:intensity_config}]{../src/utils/intensity_config.py}

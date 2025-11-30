@@ -165,7 +165,7 @@
     \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
     % Document parameters
     % Document title
-    \title{3904\_lab4}
+    \title{3902\_lab5}
     
     
     
@@ -393,7 +393,8 @@
     
     \#
 
-PID Temperature Control with an Arduino
+Affordable and Effective Analyses of Optical Properties of Fluids using
+an Arduino
 
     
 
@@ -423,7 +424,7 @@ PID Temperature Control with an Arduino
 
     \#\#\#
 
-Phy 3902 Laboratory Experiment 4
+Phy 3902 Laboratory Experiment 5
 
     
 
@@ -461,313 +462,260 @@ University of Ottawa
 
     \#\#\#
 
-November 3, 2025
+December 1, 2025
 
     \hypertarget{abstract}{%
 \subsection{Abstract}\label{abstract}}
 
-    As winter approaches, one of the most delicate balancing acts in a
-household is the temperature and the hydro bill. Most modern electrical
-heating systems operate periodically depending on input from a
-thermistor whose resistance depends on the temperature of it's
-surroundings. When the temperate sensed by the thermistor goes outside
-of a set accepted range, the heater will turn on until the desired
-temperature is reached. This is most efficient in an isolated system,
-however, it is common to adjust the output of the heating element to a
-percentage of its maximum to avoid overshooting the desired temperature
-and causing any issues with overheating. In cases where the maintained
-temperature is important for a closed or open system, a proportional,
-integral, and derivative (PID) algorithm is often the most efficient way
-to do so. PID temperature control allows for the heating element to
-react to changes in the environment and avoid significant impact to the
-system. As an example, many commercial fridges use PID temperature
-control as a way to make up for the door being constantly opened and
-closed as it is more energy efficient than the on-off model common to
-household fridges. Through this experiment it was determined that a PID
-algorithm with a basic heating element and thermistor setup controlled
-by a wallet-friendly Arduino can maintain a temperate with a standard
-deviation of \(XX^{\circ }C\) and a percent error of \(XX\%\). These
-results were used to calculate the amount of power supplied to the
-heater required to maintain different temperatures to estimate the
-specific heat of the metal blocks used in the experiment. The specific
-heat was determined to be \(\frac{J}{g^{\circ}C}\) for aluminum and
-\(\frac{J}{g^{\circ}C}\) for brass.
+    Diffraction is a powerful method of analyzing the behaviour of waves
+including how they propagate and interact with materials. For light,
+common ways of observing this behaviour are single slit, double slit,
+and diffraction grating experiments which can be used to analyze the
+spectrum of an incident beam. When a beam enters a medium, the velocity
+and wavelength of the light change, the ratio of the speed of light in a
+vacuum to this velocity in the medium is called the index of refraction
+and is unique to a medium's optical density although, not entirely
+invariant. This experiment focuses on using two lasers of known
+wavelengths to analyze the refractive indices of a variety of media with
+theoretical indices ranging from about 1 to 1.5 at standard atmosphere,
+temperature, and pressure. These materials were placed between a
+diffraction grating and a screen to analyze the change in the light's
+velocity in the medium by observing the change in the diffraction
+pattern. This change in the degrees of diffraction was recorded using a
+motorized light-dependent resistor controlled by an Arduino, from which
+the refractive indices of air, water, ethanol, and olive oil were
+calculated to within \ldots.\% of their expected values respectively.
+These results demonstrate that diffraction-based refractometry provides
+an effective and accessible method of determining select optical
+properties of non-opaque media.
 
     \hypertarget{introduction}{%
 \subsection{Introduction}\label{introduction}}
 
-    The standard on-off model of temperature control needs to be relatively
-inaccurate with a large hyteresis otherwise the life span of circuitry
-decreases proportionally with the temperature range. The ability of the
-standard on-off model to maintain a set temperature is severely
-diminished because of this and they tend to work better for realistic
-thermally isolated systems which don't need a large amount of power to
-maintain the set temperature. However, in this experiment the system is
-open to it's environment and sudden changes in temperature from external
-interaction, this is the benefit of PID control, the system is able to
-react to these changes and adjust accordingly. The first step is to make
-sure the power provided to the heater is proportional to the amount
-needed for the set temeurature, this helps to prevent the heater from
-overshooting the temperature as the power supplied to the heater
-decreases as it approaches the set temperature and increases as it drops
-below the desired range. The percentage of power applied is calculated
-using the error \(E\) as the difference between the desired and measured
-temperatures over the width of the allowed temperature band,
-\[E = \frac{T_{\text{set}} - T_{\text{measured}}}{\text{band}}, \tag{1}\]
-which was used to control the amount of power supplied to the heater as
-a percentage of the maximum amount of power
-\[ \text{Power} = ( T_{\text{offset}} + k_p E ) P_{\text{max}}. \tag{2}\]
-The factor \(k_p\) was added to control the effects of the error
-calculation and control the speed with which the system reacts. While
-this modification continues to produce a notable degree of error, it can
-be observed that the temperature-time graph follows a decaying
-sinusoidal function permits further refinement by integrating over an
-interval that is twice the time required for the temperature to increase
-by an amount equivalent to the band amplitude. The integral of the error
-over this time interval \[I = \int {E } dt\, \tag{3}\] can be used in
-conjunction with a proportionality constant \(k_i\) to avoid
-overcorrecting the power and introducing new unwanted temperature
-oscillations. Adding this factor to equation (2) gives the following
-formula for a more steady code for maintaining the set temperature
-\[\text{Power} = ( T_{\text{offset}} + k_p E + k_i I) P_{\text{max}}. \tag{4}\]
-The final adjustment is to control the temperature when reacting to
-external stimuli using derivative control. If the temperature of the
-environment or the block suddenly spikes or drops, this factor will
-allow the heater to react proportionally to the rate of change of the
-temperature of the block. This derivative \(D\) can be found by dividing
-the negative of the change in error by the time interval over which this
-change is measured, the action time of the code, using the following
-equation
-\[D = - \frac{dE}{dx} = - \frac{\Delta{E}}{\Delta{x}}. \tag{5}\] This
-value can be used in conjunction with an associated proportionality
-constant \(k_d\) and introduced to equation (4) to produce the final
-equation for maintaining the set temperature
-\[\text{Power} = ( T_{\text{offset}} + k_p E + k_i I + k_d D) P_{\text{max}}. \tag{6}\]
-While the sum of all three of these terms is very beneficial for a fast
-and highly variable system, in this experimental setup it is possible
-that the derivative control can cause any noise in the temperature
-sensor to be amplified so it may be beneficial to use a low value or
-zero for the proportionality constant \(k_d\). The final step was to
-determine the specific heat capacity of two metal blocks, this was done
-by using the PID code at 3 different set temperatures to determine the
-amount of power in watts required to maintain those temperatures and
-thus the heat loss from the block to the surroundings. Then by writing a
-program to supply 100\% power to the heater until a max temperature was
-reached delivered a reading for the amount of time \(t\) it took to
-raise the temperature of the block by 1°C with 12V of power supplied.
-Using the equation for specific heat \(c\),
-\[ c = \frac{(P_{\text{heater}} - P_{\text{loss}}) * \Delta{t}}{m * \Delta{T}}, \tag{7}\]
-where \(m\) is the mass of the block in grams. For this experiment a
-MOSFET determines how much power is supplied to the heater based on a
-duty cycle out of 255 which maps the 5V PWM source to the additional 12V
-power source connected to the heater meaning the power supplied to the
-heater was determined using
-\[ P = \frac{V^2_{\text{supply}}}{R_{\text{heater}}} * \frac{L}{255}. \tag{8}\]
-where \(L\) is the duty cycle of the MOSFET. The error throughout the
-experiment was calculated using the traditionally accepted model
-\[ \text{\%error} = \frac{\text{|Experimental - Theoretical|}}{\text{Theoretical}} * 100\%. \tag{9}\]
+    When monochromatic light passes through a medium, many methods of
+diffraction can be used to determine the angle at which the beam
+propagates using Snell's law, discovered by Willebrord Snell in 1621,
+before being published by René Descartes, who discovered it
+independently in 1637. The theory of diffraction describes the way waves
+bend and spread around an obstacle or through an opening without any
+change in energy due to the interference of the waves which was first
+coined by Francesco Grimaldi in 1660. The degree of this contortion is
+dependent on how comparable the size the opening or obstacle is relative
+to the wavelength. A simple experiment to analyze the wave properties of
+light is performed by passing a beam through a diffraction grating with
+slits that are comparable in width to the wavelength of the light being
+analyzed. They let a small portion of the light through and the
+interference pattern can be observed on a screen some distance away from
+the grating. The grating splits the beam of light into its constituent
+wavelengths which propagate and interfere with each other either
+constructively or destructively creating an even, exponential,
+decreasing, sinusoidal pattern centered on the normal of the grating on
+the plane of incidence. This interference creates bands of light on the
+screen where the waves interfere constructively, broken up by dark spots
+where the interference is destructive. The 0th order is the undeviated
+beam where the maximum transmission intensity is observed. The
+intensities of subsequent orders of fringes can be normalized to this
+maximum intensity producing a standardized equation for theoretically
+determining the diffraction pattern for all beams and wavelengths.
+
+    Figure 1: The graph of the normalized intensity at the screen as a
+function of the fringe number and a visual representation of the
+diffraction inteference pattern on the screen (?)
+https://www.iitianacademy.com/ib-dp-physics-9-2-single-slit-diffraction-question-bank-hl-paper-1
+(Q1) ,
+https://www.researchgate.net/figure/Single-slit-diffraction-pattern-of-particles-In-the-process-of-light-propagation-when\_fig5\_351288282
+
+    In order for constructive interference to occur, the path difference
+between the waves at adjacent slits in the diffraction grating will be
+an integer multiple of the wavelength \(\lambda\). This is when both
+waves have the same phase. The path difference between these waves
+creates a right-angle triangle with the spacing of the grating \(d\) as
+the hypotenuse and one side equal to the path difference. The sinusoidal
+relationship between the hypotenuse and the opposite side of a
+right-angle triangle signifies that the angle \(\theta\) between any
+band or fringe with the fringe number \(m\) and the center or 0th order
+fringe can be given by the following equation
+\[\theta_{air} = \arcsin (\frac{m \lambda}{d}).\tag{1}\] The refractive
+index of a medium refers to the ratio of the speed of light in a vacuum
+\(c\) to the speed of light in that specific medium \(v\), however, for
+a linear medium this index depends on the density meaning it can be
+altered by a number of factors including temperature and pressure.
+Fortunately, assuming the frequency of the relatively low intensity beam
+will remain constant as it is dependent on the source of the light
+rather than the medium in which it travels allows for the equations for
+speed of light in a vacuum, \[ c = f \lambda_0, \tag{2}\] and the speed
+of light in a certain medium \[ v = f \lambda, \tag{3}\] to be solved
+for frequency and set equal to one another. This produces an equation
+for the wavelength of a beam in a medium that is directly proportional
+to its wavelength in a vacuum;
+\[ \frac{c}{\lambda_0} = \frac{v}{\lambda} \text{    or    } \lambda = \frac{\lambda_0}{n}, \tag{4}\]
+with a proportionality constant of \(n = \frac{c}{v}\). Equation (2) can
+be used in conjunction with equation (4) to produce the following
+formula to determine the index of refraction of a material under any
+conditions \[n = \frac{\lambda_0 m}{d \sin(\theta)}. \tag{5}\]
+
+    This is an acceptable formula to use for determining the index based on
+the diffraction pattern effects of one medium, or in this case, if there
+was only one medium between the diffraction grating and the LDR.
+However, the setup and materials available had limitations, because
+equation (1) only applies in the medium the diffraction grating is in
+which for this experiment is air as the grating could not be submerged.
+To account for this, any distance greater than 1mm must be factored in
+to avoid a significant error in the calculation of the liquid's index of
+refraction as any air gaps will introduce a lateral shift larger than
+the liquid contribution. The distance the beam travels within each
+medium must be taken into account. Snell's law,
+\[n_1 \sin(\theta)_1 = n_2 \sin(\theta)_2 \tag{6} \] can be used across
+each interface to determine a relationship between the incident beam and
+the final exit angle \(\theta_{out}\) measured at the screen, if the
+beam incident on the grating is aligned normal to it, this simplifies
+the calculation. As the beam passes through the medium, the change in
+the speed of light within the medium will bend it towards the normal if
+it is more refractive than air and away from the normal if it is less
+refractive. This bending will shift the location of the maxima at the
+screen by \(\Delta x\), the relative displacement of each order fringe
+is necessary for determining the speed of light in the medium which is
+inversely proportional to its refractive index. If a fringe \(i\) is at
+position \(x\) then using the geometry of the beam path one can find
+\[ x_i = p \tan (\theta_i), \tag{7}\] where \(p\) is the path length the
+beam travels in each medium and \(\theta\) is the displacement angle
+from the normal of the \(i^{th}\) order fringes which should be
+equidistant from the normal. This equation is required to combine the
+impacts of the two mediums, or, the displacement of the \(i^{th}\) order
+fringe can be determined by taking the difference
+\[ \Delta x = p \sin( \theta_{\text{air}} ) \left( \frac{1}{ \sqrt{1 - \sin^2 ( \theta_{\text{air}} ) }} + \frac{1}{ \sqrt{n_{liq}^2 - \sin^2 ( \theta_{\text{air}} ) }})\right) \tag{8},\]
+where the factor \(p\) accounts for the liquid path length. This
+equation is not suitable for a third index nor if the beam is incident
+on the grating at an angle to the normal but can be modified further to
+account for multiple linear media and an incident angle. Through some
+aggressive simplification, this equation can be solved for the index of
+refraction giving a final formula for a very simple experiment
+\[ n = \sin \left( \theta_{ \text{air}} \right) \sqrt{ 1 +  \frac{p^2 \left( 1 - \sin^2 \left( \theta_{ \text{air}} \right) \right) }{ \left( p \sin \left( \theta_{ \text{air}} \right) - \Delta x \sqrt{ 1 - \sin^2 \left( \theta_{ \text{air}} \right)} \right) ^2}}. \tag{9}\]
+There is no need for the effect of the walls of the vessel for the
+liquid to be included in equation (8) as, in this case, only the
+displacement from its position of the maxima with only the empty cuvette
+compared to the filled cuvette was used to determine the effective
+shift. Conversely, if the refractive index of the substance in the
+cuvette is calculated, the wavelength of the light in the fluid can be
+calculated with a simple combination of equations (4) and (9) which
+produces the following,
+\[ \lambda = \frac{d}{m \sqrt{ 1 +  \frac{p^2 \left( 1 - \sin^2 \left( \theta_{ \text{air}} \right) \right) }{ \left( p \sin \left( \theta_{ \text{air}} \right) - \Delta x \sqrt{ 1 - \sin^2 \left( \theta_{ \text{air}} \right)} \right) ^2}}}. \tag{10}\]
+This effect can be observed primarily in media with high-refractive
+indices as the change in wavelength may be visible. The goal for this
+experiment is to determine a very cost effective way to calculate the
+refractive indices of liquids.
 
     \hypertarget{methods}{%
 \subsection{Methods}\label{methods}}
 
-    The first step of this experiment is to establish a code to trigger the
-heating element to turn on and off with the temperature reading of the
-thermistor. The initial code to expand on turned on the heating element
-at maximum power until the thermistor registered a set temperature of
-65°C at which point it turned the element off until it reached the low
-temperature limit. The temperature was recorded roughly every second and
-the temperature read from the thermistor was graphed as a function of
-the elapsed time, the shape of this graph was expected to be a positive
-linear trend upward with a peak generously above the set temperature
-with a steeper decline to the low end of the passband indicating the
-circuit functioned as expected. The setup for this experiment was the
-same throughout as the only change required to turn an on-off
-temperature control into a PID control is a change in code.
+    The setup and assembly for this experiment was more simple than the math
+required to make it work. A laser was placed at one end of the table
+opposite a stepper motor fashioned to a track affixed to an LDR with a
+diffraction grating on a stand in-between the laser stand and the motor.
+For the purpose of meeting the short deadline of this experiment, the
+required length of the track was determined ahead of time by taking
+twice opposite side length to the theoretical angle for the first order
+peak in air based on equation (1) as the fringes were expected to get
+closer together as the index increased. A cuvette was placed between the
+diffraction grating and the LDR. Initially it was placed roughly 1-2mm
+from the grating, however, the refractive indices produced by equation
+(9) carried a 10-20\% error and it was determined that any distance
+travelled by the light between the grating and the LDR greater than 1mm
+needed to be accounted for. Thus, the cuvette was placed flush with the
+grating for equation (8) to be sufficient. Finally, the black box was
+added to isolate the light reactive portions of the assembly to avoid
+external interference to maximize the difference between bright and dark
+fringes.
 
-    Figure 1: Wire diagram of the set up used throughout the entirety of the
-experiment.
+    Figure 2: Diagram of the setup for the experiment including required
+connections and approximate beam path.
 
-    After a baseline reactivity of the system was established using the
-on-off control code, equation (2) was used to control the output power
-to the heater. This allowed for the power to the heater to be modulated
-based on the error between the actual block temperature and the set
-temperature and for the hysteresis to be better enforced and lessen the
-likelihood of the temperature exceeding the band. The proportionality
-constant \(k_p\) was set to 0.1 and slowly increased until a noticable
-benefit was noticed. While this improved upon the ability of the heater
-to keep the block within the hysteresis, it maintained a quite large gap
-from the set temperature and overshot the goal with each oscillation. To
-improve upon this the code, the integral control is implemented to
-minimize the gap between the measured and set temperatures to increase
-the rate of decay of the sinusoidal shape of meaured temperature. The
-reaction time of the system is the time it takes for the temperature to
-change by the value of the band, the integral action time should be
-twice this value to give the system time to stabilize. Using a low
-proportionality constant \(k_i\) \textasciitilde0.0001 further helps to
-minimize speed of system reactions, the constant can be slowly increased
-until the desired effects are observed without overcorrection.
+    After the code was finished, a measurement was taken of the fringes with
+the only medium being air to ensure the experimental setup and formulae
+were able to determine a correct value for the refractive index of air,
+1. As a secondary verification, it is possible to place a thin glass
+slide of thickness \(p\) flush with the diffraction grating to ensure
+the desired spread of the fringes is observed. Next a measurement was
+taken with the empty cuvette flush with the grating to ensure the
+estimate that the contribution due to the parallel quartz walls of the
+vessel was minimal and determine a baseline against which to measure the
+change in position of the fringes. The cuvette was then filled with each
+of the available substances one by one ranging in refractive indices and
+rinsed with ethanol in between each to ensure to minimize contamination
+as only one of each cuvette was available. The use of a macro cuvette is
+recommended as initially a plastic semi-micro cuvette was used however,
+the edges of the cuvette tended to clip the first order fringes whereas,
+in further attempts, a quartz macro cuvette was used and significantly
+eased the alignment and data collection processes.
 
-The final code modification for the PID temperature control system is
-the derivative control, this is best to ensure a system can combat
-sudden changes in environmental temperature. In the lab environment this
-can be simulated, however, after adding the derivative factor for a
-fairly stable surrounding environment or a slow changing system could
-increase the system overreacting and overshooting the desired
-temperature due to noise from the thermistor reading and amplify
-measurement error which would induce oscillations cancelled out by the
-integral factor. The derivative factor is especially useful for systems
-with rapidly changing dynamics like motors as it dampens these changes
-in the system. In order to minimize unwanted effects, the
-proportionality constant \(k_d\) was set to 0.01 and decreased until the
-system stopped overreacting to noise in the measurements.
-
-    The temperature-time graphs were analyzed at 2 different set
-temperatures to determine the voltage required to maintain each desired
-value using the duty cycle of the MOSFET at the stabilized end of the
-graph by plugging it into equation (8) to find the heat loss from the
-block. Next the specific\_heat\_measurement.ino code which merely
-applied full power to the heating element until a max set temperature
-was reached from which the values were obtained for the amounts of time
-and power required to raise the temperature of the block by 1°C.
-Equation (7) used these values to determine the specific heat of both
-blocks and the alternate temperatures were used to help estimate the
-accuracy and observe how the specific heat changes between low and high
-temperatures.
+The liquids were measured in order from lowest theoretical refractive
+index to highest with a consideration for viscosity. For each liquid,
+the intensity was plotted to ensure a visible peak could be established
+at the areas of constructive interference. The centers of these peaks
+were used to determine the displacement of the first order positive and
+negative peaks and were placed into equation (9) to calculate the
+refractive indices of each substance. The first laser used has an
+approximate wavelength of 650nm, to verify the precision of this method
+a second laser with a 532nm wavelength was exchanged for the 650nm.
+Twenty readings were taken by the LDR every 0.2mm and averaged to attain
+the maximum precision possible with the instrument. The inverse of these
+values were plotted against the position of the LDR on the track
+centered about the center fringe. The bright spots on the graph were
+thick, messy peaks with an uncentered maxima, presumably due to
+limitations of the LDR, so the center of each peak was calculated based
+on the span of the position that reached a threshold intensity value,
+and these points were used to determine the distances from the center
+fringe. The position values were compared to the baseline values
+established with the empty cuvette fringe positions and plugged into
+equation (9) to find the respective refractive indices of the fluids.
 
     \hypertarget{results-and-discussion}{%
 \subsection{Results and Discussion}\label{results-and-discussion}}
 
-    For the first part of the experiment that involved verifying all
-components of the circuit were functioning as expected the temperature
-of the simple on-off control code was graphed as a function of time. The
-resulting shape of the graph was as expected, a steady linear increase
-in temperature with a curved peak slightly above the set temperature of
-65°C indicating that this strategy of heating tends to overshoot the set
-temperature. After the peak there was a steeper linear decrease in
-temperature until it reached the low end of the allowed temperature band
-indicating the block lost the heat faster than it gained it which points
-to this being a poor method of temperature control for an open system.
-This data functioned as a baseline for the required improvements to
-maintain a set temperature as well as a reference for the improved
-performance and efficiency of a PID filter versus a traditional on-off
-temperature control.
+    Initial results for the calculation were found using a semi-micro
+cuvette and after many trials and measurements all produced physically
+impossible values, particularly, refractive indices less than 1 which is
+the value for vacuum that cannot be exceeded. Many adjustments were made
+to the alignment of the setup and the measurements and calculations were
+redone and tripple-checked without much improvement, finally the plastic
+semi-micro cuvette was swapped for a quartz macro cuvette. Instant
+improvements were observed in the results and it was determined that the
+protruding edges of the semi-micro cuvette were clipping the first order
+fringe beams exiting the liquid. This resulted in errors in all of the
+calculations as the beams were diverted from their natural diffraction
+angles.
 
-    Figure 2: The graph of temperature as a function of time for the simple
-on-off circuit with a band of 3.
-
-    After the code was improved upon, the anticipated effects were observed
-in the temperature time graphs for each of the modifications. When
-equation (2) was used to determine the amount of power supplied to the
-heater in terms of the duty cycle of the MOSFET, it was evident that
-this method of tempurature control was already significantly more
-accurate than the on-off model. The temperature of the block was within
-the band significantly longer and it overshot the upper limit of the
-band by much less. This is also where the decaying sinusoidal nature of
-these style of systems can start to be observed as the proper use of
-error in the calculation for power output ensures the system reacts
-according to surroundings with significantly less delay.
-
-    Figure 3: The temperature-time graph of the proportionally controlled
-heater circuit with a band of 1 in accordance with equation (2).
-
-    Due to the constant offset the temperature was still not quite accurate
-to the desired results as the heater maintained a non-zero power input
-even when the target temperature was reached resulting in a steady state
-solution just higher or lower than the set point. This is where the
-integral portion came into play as it further ensured that the use of
-the error value in the function has a longterm effect as well as an
-immediate one. The variable ensured the total error decreased over each
-action time resulting in a very accurate steady state temperature. This
-effect is observed in the following graph as the amplitude of the
-function decays significantly every 50 seconds which was the value of
-the action time.
-
-    Figure 4: The temperature-time graph of the proportionally and
-integrally controlled heater circuit with a band of 1 in accordance with
-equation (4).
-
-    The system, however, was still very slow to react to external stimuli
-whereas a notable observation with the inclusion of the derivative
-control was that when there was a sharp drop in temperature observed,
-the system reacted significantly more quickly than without. During one
-run of the code the thermistor was bumped out of the block resulting in
-the program observing a rapid decrease in temperature, this was the only
-time during the experiment the heater went to 100\% power output without
-it being explicitly set within the code. At the time of this run the
-derivative constant was set to 0.001 proving the impact that even
-minimized variables can have on a reactive system. On the other hand,
-for the majority of the runs where \(k_d\) was non-zero, the
-differentiation variable emphasized the noise, or high frequency
-changes, likely caused by sensor fluctuations inherent to the thermistor
-or digitization of the readings.
-
-    Figure 5: The temperature-time graph of the proportionally, integrally,
-and derivatively controlled heater circuit with a band of 1 in
-accordance with equation (6).
-
-    While the results and graphs obtained for the temperature control
-algorithms all had very little deviation from the expected results, the
-same could not be said for the specific heat capacity calculation. For
-the aliminum block which had a mass of 24.64 ± 0.005g and took about 4.4
-seconds to heat up by 1°C, the specific heat was calculated to be around
-\(1.8 \frac{J}{g^{\circ}C}\) whereas the accepted value is
-\(0.9 \frac{J}{g^{\circ}C}\). It was announced beforehand that the
-results for aluminum tend to come out higher than the expected result,
-however, this 100\% error indicates either that the calculation or the
-measurements were incredibly far off. The measurements for the brass
-block yield similar issues, it had a mass of 72.35 ± 0.005g and took
-about 5.3 seconds to heat up by 1°C, the specific heat was calculated to
-be around \(0.8 \frac{J}{g^{\circ}C}\) whereas the accepted value is
-\(0.4 \frac{J}{g^{\circ}C}\).
-
-    Figure 6: ********A graph related to specific heat capacity???********
-
-    Perhaps getting a wider range of values would have helped in determining
-where in the setup the error was, however, due to complications with
-broken hardware throughout the experiment, the expected time line for
-the experiment was significantly altered. The most likely culprit seemed
-to be an error in the code for the scaling, recording, or calculation of
-the power value at either the PWM or MOSFET level or in the code
-determining joule output in the specific heat measurement calculation or
-amplification of noise before the calculation.
+Given that this experiment was able to produce results for miniscule
+changes in refractive index as is evident by the ability of the setup to
+differentiate between water and ethanol which have very similar
+refractive indices, it is possible the theory could be expanded upon to
+determine impurities. Based on the observations and theoretical
+calculations, the LDR should be able to detect a change of at least
+\(5 \times 10^{-4}\) in the refractive index, this would correlate to an
+ability to detect a roughly 2\% impurity in a substance. While this
+wouldn't qualify as lab or weapons grade purity, simple modifications
+could be made to increase the sensitivity to detect a change in
+refractive index up to \(1 \times 10^{-6}\) and this process could be
+used to determine very minute impurities in any transparent or
+translucent liquids and likely gases.
 
     \hypertarget{conclusion}{%
 \subsection{Conclusion}\label{conclusion}}
 
-    In conclusion, the Arduino-based PID temperature control system
-effectively demonstrated progressive improvements in stability and
-response across the ON--OFF, P, PI, and PID configurations. The PI
-controller achieved the most stable performance, maintaining the target
-temperature with the smallest standard deviation and least noise
-reactivity, validating its theoretical advantages. However, the
-experimentally determined specific heat capacities for aluminum and
-brass were significantly higher than accepted values, primarily due to
-systematic errors. These could have included code-related issues such as
-the chosen constants or improper power scaling of the PWM signals,
-circuitry losses through the MOSFET and wiring, limited thermal
-insulation, and sensor inaccuracies from the thermistor. Had there been
-more time for the experiment it could have proven beneficial to
-incorporate direct voltage and current measurements for accurate power
-determination, improved sensor calibration, and refined control code to
-eliminate offset bias. Despite these discrepancies, the experiment
-successfully demonstrated the principles and effectiveness of PID-based
-temperature regulation.
+    Overall, the experiment demonstrates that a simple optical setup,
+supported by accessible Arduino-based instrumentation, can accurately
+determine refractive indices across a range of liquids. The LDR was able
+to determine changes in refractive index down to 0.005 and the setup as
+a whole was able to consistentky successfully verify the theoretical
+refractive indices of a variety of fluids. Water was calculated to have
+a refractive index of .. with a percent error of \ldots\% from the
+theoretical value of 1.333, ethanol was found to be .. with a percent
+error of \ldots\% from the theoretical value of 1.361, and extra virgin
+olive oil was determined to be .. with a percent error of \ldots\% from
+the theoretically accepted range of 1.465-1.480.
 
     \hypertarget{references}{%
 \subsection{References}\label{references}}
-
-    Webpages:
-
-Michel Godin;
-https://uottawa.brightspace.com/content/enforced/523665-2259FS0268421B00/PHY\%203902\_LED\_E\_2023.pdf
-(Accessed on October 20, 2025)
-
-    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
-\prompt{In}{incolor}{ }{\boxspacing}
-\begin{Verbatim}[commandchars=\\\{\}]
-
-\end{Verbatim}
-\end{tcolorbox}
 
 
     % Add a bibliography block to the postdoc

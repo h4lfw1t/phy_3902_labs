@@ -1,0 +1,81 @@
+The experimental apparatus consisted of a laser source, a diffraction
+grating, a sample cuvette, and a light-dependent resistor (LDR) mounted
+on a stepper motor-driven linear track.
+The laser was positioned at one end of the optical table, with the LDR
+assembly at the opposite end.
+A diffraction grating was placed between them on an adjustable stand.
+The track length was designed to capture the first-order diffraction
+peaks, calculated based on the theoretical diffraction angle for air
+using equation~\eqref{eq:diffraction_angle}.
+All light-sensitive components were enclosed in a black box to minimize
+ambient light interference and maximize the contrast between bright and
+dark fringes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{refractometry_setup_diagram}
+    \caption{Diagram of the experimental setup showing the laser source,
+    diffraction grating, cuvette, and LDR mounted on the linear
+    track. The entire assembly is enclosed in a light-tight box to reduce
+    ambient light interference.}
+    \label{fig:experimental_setup}
+\end{figure}
+
+The cuvette placement proved critical to measurement accuracy.
+Initial trials positioned the cuvette 1--2~mm from the diffraction
+grating, which produced refractive indices with 10--20\% errors.
+Analysis revealed that air gaps greater than 1~mm introduce significant
+lateral shifts that must be accounted for in the theoretical model.
+To simplify the optical path and improve accuracy, the cuvette was
+repositioned flush against the grating, eliminating the air gap and
+allowing equation~\eqref{eq:wavelength_refractive_index} to be directly applicable.
+
+The experimental procedure began with control measurements to validate
+the setup.
+First, the diffraction pattern was measured through air alone to verify
+that the apparatus could correctly determine the refractive index of
+air \((n \approx 1.000)\).
+Next, an empty cuvette was placed flush with the grating to establish a
+baseline measurement.
+This baseline accounts for the optical effects of the quartz cuvette
+walls, allowing the displacement due to the liquid alone to be isolated
+by comparison.
+
+The choice of cuvette significantly impacted data quality.
+Initial measurements used a plastic semi-micro cuvette, but the
+protruding edges clipped the first-order diffraction beams, distorting
+the fringe positions.
+Switching to a quartz macro cuvette with a wider aperture resolved this
+issue and substantially improved alignment and data collection.
+
+Each test liquid (water, ethanol, and extra virgin olive oil) was
+measured in sequence, with the cuvette rinsed thoroughly with ethanol
+between samples to prevent cross-contamination.
+Liquids were tested in order of increasing refractive index, with
+consideration given to viscosity for efficient rinsing.
+
+Two laser sources were employed to assess wavelength-dependent effects:
+a 650~nm red laser and a 532~nm green laser.
+For each measurement, the LDR scanned across the diffraction pattern in
+0.2~mm increments.
+At each position, 20 resistance readings were taken and averaged to
+reduce noise and improve precision.
+The inverse resistance (proportional to light intensity) was plotted
+against the LDR position on the track.
+
+The LDR detection system produced broad, asymmetric intensity peaks
+rather than sharp maxima.
+To determine the center of each peak, the positions where the intensity
+exceeded a threshold value were identified, and the midpoint of this
+span was calculated.
+This method provided consistent peak localization despite the inherent
+limitations of the LDR sensor.
+
+The positions of the first-order peaks (both positive and negative
+diffraction orders) were determined from the intensity plots and
+compared to the baseline positions from the empty cuvette measurement.
+The displacement values \((\Delta x)\) were then substituted into
+equation (8) to calculate the refractive index of each liquid.
+The measurements were repeated with both laser wavelengths to verify
+precision and identify any systematic wavelength-dependent errors.
+
